@@ -4,6 +4,6 @@
   "private": true,
   "description": "Browser regression tests for the AquaWatch Python application",
   "scripts": {"test:browser": "node tests/browser.cjs"},
-  "devDependencies": {"playwright": "1.62.1"},
+  "devDependencies": {"playwright": "1.63.0"},
   "engines": {"node": ">=22"}
 }
