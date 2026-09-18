@@ -91,10 +91,11 @@ def main():
     elif args.command == "analytics":
         export_raw(engine)
         env = {**os.environ, "DBT_SEND_ANONYMOUS_USAGE_STATS": "false"}
-        executable = Path(sys.executable).with_name("dbt.exe" if os.name == "nt" else "dbt")
+        # Use this interpreter's installed dbt in both virtualenv and system layouts.
+        dbt_command = [sys.executable, "-m", "dbt.cli.main"]
         subprocess.run(
             [
-                str(executable),
+                *dbt_command,
                 "build",
                 "--project-dir",
                 "dbt",
@@ -108,7 +109,7 @@ def main():
         )
         subprocess.run(
             [
-                str(executable),
+                *dbt_command,
                 "docs",
                 "generate",
                 "--project-dir",
