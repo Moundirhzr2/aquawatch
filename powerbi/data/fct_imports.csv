@@ -1,0 +1,2 @@
+run_id,file_name,started_at,status,accepted,rejected,duplicates
+46d82b79-61cd-4884-bc2b-56551067447a,synthetic-baseline.csv,2026-09-10 21:13:37.533080,completed,10796,8,5

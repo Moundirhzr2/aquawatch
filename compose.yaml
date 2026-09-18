@@ -1,0 +1,46 @@
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-aquawatch}
+      POSTGRES_DB: ${POSTGRES_DB:-aquawatch}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run python scripts/create_env.py first}
+    ports:
+      - "127.0.0.1:${AQUAWATCH_DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+    restart: unless-stopped
+  app:
+    build: .
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-aquawatch}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-aquawatch}
+      ALLOWED_HOSTS: localhost,127.0.0.1
+    ports:
+      - "127.0.0.1:${AQUAWATCH_APP_PORT:-8000}:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+  analytics:
+    build: .
+    profiles: [analytics]
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-aquawatch}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-aquawatch}
+      PGHOST: db
+      PGPORT: '5432'
+      PGUSER: ${POSTGRES_USER:-aquawatch}
+      PGDATABASE: ${POSTGRES_DB:-aquawatch}
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+    depends_on:
+      app:
+        condition: service_healthy
+    volumes:
+      - ./powerbi/data:/app/powerbi/data
+    command: [aquawatch, analytics, --target, postgres]
+volumes:
+  postgres_data:

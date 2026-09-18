@@ -1,0 +1,638 @@
+{
+  "name": "AquaWatch",
+  "compatibilityLevel": 1600,
+  "model": {
+    "culture": "en-US",
+    "defaultPowerBIDataSourceVersion": "powerBI_V3",
+    "tables": [
+      {
+        "name": "dim_meters",
+        "columns": [
+          {
+            "name": "meter_id",
+            "dataType": "string",
+            "sourceColumn": "meter_id",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "customer_id",
+            "dataType": "string",
+            "sourceColumn": "customer_id",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "customer_name",
+            "dataType": "string",
+            "sourceColumn": "customer_name",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "district",
+            "dataType": "string",
+            "sourceColumn": "district",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "segment",
+            "dataType": "string",
+            "sourceColumn": "segment",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "installed_on",
+            "dataType": "dateTime",
+            "sourceColumn": "installed_on",
+            "summarizeBy": "none",
+            "formatString": "yyyy-MM-dd"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "dim_meters",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "  Source = Csv.Document(File.Contents(DataFolder & \"/dim_meters.csv\"), [Delimiter=\",\", Columns=6, Encoding=65001, QuoteStyle=QuoteStyle.Csv]),",
+                "  Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),",
+                "  EmptyToNull = Table.ReplaceValue(Headers, \"\", null, Replacer.ReplaceValue, Table.ColumnNames(Headers)),",
+                "  Typed = Table.TransformColumnTypes(EmptyToNull, {{\"meter_id\", type text}, {\"customer_id\", type text}, {\"customer_name\", type text}, {\"district\", type text}, {\"segment\", type text}, {\"installed_on\", type date}}, \"en-US\")",
+                "in",
+                "  Typed"
+              ]
+            }
+          }
+        ],
+        "measures": [
+          {
+            "name": "Connected meters",
+            "expression": "DISTINCTCOUNT(dim_meters[meter_id])",
+            "formatString": "#,0",
+            "description": "Synthetic demonstration; see docs/metric-definitions.md for grain and limitations."
+          }
+        ]
+      },
+      {
+        "name": "dim_date",
+        "columns": [
+          {
+            "name": "calendar_date",
+            "dataType": "dateTime",
+            "sourceColumn": "calendar_date",
+            "summarizeBy": "none",
+            "formatString": "yyyy-MM-dd"
+          },
+          {
+            "name": "year_number",
+            "dataType": "int64",
+            "sourceColumn": "year_number",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "month_number",
+            "dataType": "int64",
+            "sourceColumn": "month_number",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "day_number",
+            "dataType": "int64",
+            "sourceColumn": "day_number",
+            "summarizeBy": "none"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "dim_date",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "  Source = Csv.Document(File.Contents(DataFolder & \"/dim_date.csv\"), [Delimiter=\",\", Columns=4, Encoding=65001, QuoteStyle=QuoteStyle.Csv]),",
+                "  Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),",
+                "  EmptyToNull = Table.ReplaceValue(Headers, \"\", null, Replacer.ReplaceValue, Table.ColumnNames(Headers)),",
+                "  Typed = Table.TransformColumnTypes(EmptyToNull, {{\"calendar_date\", type date}, {\"year_number\", Int64.Type}, {\"month_number\", Int64.Type}, {\"day_number\", Int64.Type}}, \"en-US\")",
+                "in",
+                "  Typed"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "fct_consumption",
+        "columns": [
+          {
+            "name": "reading_id",
+            "dataType": "string",
+            "sourceColumn": "reading_id",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "meter_id",
+            "dataType": "string",
+            "sourceColumn": "meter_id",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "reading_date",
+            "dataType": "dateTime",
+            "sourceColumn": "reading_date",
+            "summarizeBy": "none",
+            "formatString": "yyyy-MM-dd"
+          },
+          {
+            "name": "counter_liters",
+            "dataType": "int64",
+            "sourceColumn": "counter_liters",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "previous_counter_liters",
+            "dataType": "int64",
+            "sourceColumn": "previous_counter_liters",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "interval_days",
+            "dataType": "int64",
+            "sourceColumn": "interval_days",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "run_id",
+            "dataType": "string",
+            "sourceColumn": "run_id",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "interval_status",
+            "dataType": "string",
+            "sourceColumn": "interval_status",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "consumption_liters",
+            "dataType": "int64",
+            "sourceColumn": "consumption_liters",
+            "summarizeBy": "none"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "fct_consumption",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "  Source = Csv.Document(File.Contents(DataFolder & \"/fct_consumption.csv\"), [Delimiter=\",\", Columns=9, Encoding=65001, QuoteStyle=QuoteStyle.Csv]),",
+                "  Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),",
+                "  EmptyToNull = Table.ReplaceValue(Headers, \"\", null, Replacer.ReplaceValue, Table.ColumnNames(Headers)),",
+                "  Typed = Table.TransformColumnTypes(EmptyToNull, {{\"reading_id\", type text}, {\"meter_id\", type text}, {\"reading_date\", type date}, {\"counter_liters\", Int64.Type}, {\"previous_counter_liters\", Int64.Type}, {\"interval_days\", Int64.Type}, {\"run_id\", type text}, {\"interval_status\", type text}, {\"consumption_liters\", Int64.Type}}, \"en-US\")",
+                "in",
+                "  Typed"
+              ]
+            }
+          }
+        ],
+        "measures": [
+          {
+            "name": "Consumption m3",
+            "expression": "DIVIDE(SUM(fct_consumption[consumption_liters]), 1000)",
+            "formatString": "#,0.0",
+            "description": "Synthetic demonstration; see docs/metric-definitions.md for grain and limitations."
+          },
+          {
+            "name": "Valid interval share",
+            "expression": "DIVIDE(CALCULATE(COUNTROWS(fct_consumption), fct_consumption[interval_status] = \"valid\"), COUNTROWS(fct_consumption))",
+            "formatString": "0.00%",
+            "description": "Synthetic demonstration; see docs/metric-definitions.md for grain and limitations."
+          },
+          {
+            "name": "Reading count",
+            "expression": "COUNTROWS(fct_consumption)",
+            "formatString": "#,0",
+            "description": "Synthetic demonstration; see docs/metric-definitions.md for grain and limitations."
+          }
+        ]
+      },
+      {
+        "name": "fct_billing",
+        "columns": [
+          {
+            "name": "invoice_id",
+            "dataType": "string",
+            "sourceColumn": "invoice_id",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "meter_id",
+            "dataType": "string",
+            "sourceColumn": "meter_id",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "tariff_id",
+            "dataType": "string",
+            "sourceColumn": "tariff_id",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "period_start",
+            "dataType": "dateTime",
+            "sourceColumn": "period_start",
+            "summarizeBy": "none",
+            "formatString": "yyyy-MM-dd"
+          },
+          {
+            "name": "period_end",
+            "dataType": "dateTime",
+            "sourceColumn": "period_end",
+            "summarizeBy": "none",
+            "formatString": "yyyy-MM-dd"
+          },
+          {
+            "name": "billed_volume_liters",
+            "dataType": "int64",
+            "sourceColumn": "billed_volume_liters",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "billed_amount_cents",
+            "dataType": "int64",
+            "sourceColumn": "billed_amount_cents",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "expected_amount_cents",
+            "dataType": "int64",
+            "sourceColumn": "expected_amount_cents",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "signed_difference_cents",
+            "dataType": "int64",
+            "sourceColumn": "signed_difference_cents",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "review_amount_cents",
+            "dataType": "int64",
+            "sourceColumn": "review_amount_cents",
+            "summarizeBy": "none"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "fct_billing",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "  Source = Csv.Document(File.Contents(DataFolder & \"/fct_billing.csv\"), [Delimiter=\",\", Columns=10, Encoding=65001, QuoteStyle=QuoteStyle.Csv]),",
+                "  Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),",
+                "  EmptyToNull = Table.ReplaceValue(Headers, \"\", null, Replacer.ReplaceValue, Table.ColumnNames(Headers)),",
+                "  Typed = Table.TransformColumnTypes(EmptyToNull, {{\"invoice_id\", type text}, {\"meter_id\", type text}, {\"tariff_id\", type text}, {\"period_start\", type date}, {\"period_end\", type date}, {\"billed_volume_liters\", Int64.Type}, {\"billed_amount_cents\", Int64.Type}, {\"expected_amount_cents\", Int64.Type}, {\"signed_difference_cents\", Int64.Type}, {\"review_amount_cents\", Int64.Type}}, \"en-US\")",
+                "in",
+                "  Typed"
+              ]
+            }
+          }
+        ],
+        "measures": [
+          {
+            "name": "Invoice amount to review EUR",
+            "expression": "DIVIDE(SUM(fct_billing[review_amount_cents]), 100)",
+            "formatString": "€ #,0.00",
+            "description": "Synthetic demonstration; see docs/metric-definitions.md for grain and limitations."
+          },
+          {
+            "name": "Billed amount EUR",
+            "expression": "DIVIDE(SUM(fct_billing[billed_amount_cents]), 100)",
+            "formatString": "€ #,0.00",
+            "description": "Synthetic demonstration; see docs/metric-definitions.md for grain and limitations."
+          },
+          {
+            "name": "Expected amount EUR",
+            "expression": "DIVIDE(SUM(fct_billing[expected_amount_cents]), 100)",
+            "formatString": "€ #,0.00",
+            "description": "Synthetic demonstration; see docs/metric-definitions.md for grain and limitations."
+          },
+          {
+            "name": "Flagged invoices",
+            "expression": "COALESCE(CALCULATE(COUNTROWS(fct_billing), fct_billing[review_amount_cents] > 0), 0)",
+            "formatString": "#,0",
+            "description": "Synthetic demonstration; see docs/metric-definitions.md for grain and limitations."
+          }
+        ]
+      },
+      {
+        "name": "fct_cases",
+        "columns": [
+          {
+            "name": "case_id",
+            "dataType": "string",
+            "sourceColumn": "case_id",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "meter_id",
+            "dataType": "string",
+            "sourceColumn": "meter_id",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "kind",
+            "dataType": "string",
+            "sourceColumn": "kind",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "event_date",
+            "dataType": "dateTime",
+            "sourceColumn": "event_date",
+            "summarizeBy": "none",
+            "formatString": "yyyy-MM-dd"
+          },
+          {
+            "name": "severity",
+            "dataType": "string",
+            "sourceColumn": "severity",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "status",
+            "dataType": "string",
+            "sourceColumn": "status",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "amount_cents",
+            "dataType": "int64",
+            "sourceColumn": "amount_cents",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "version",
+            "dataType": "int64",
+            "sourceColumn": "version",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "title",
+            "dataType": "string",
+            "sourceColumn": "title",
+            "summarizeBy": "none"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "fct_cases",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "  Source = Csv.Document(File.Contents(DataFolder & \"/fct_cases.csv\"), [Delimiter=\",\", Columns=9, Encoding=65001, QuoteStyle=QuoteStyle.Csv]),",
+                "  Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),",
+                "  EmptyToNull = Table.ReplaceValue(Headers, \"\", null, Replacer.ReplaceValue, Table.ColumnNames(Headers)),",
+                "  Typed = Table.TransformColumnTypes(EmptyToNull, {{\"case_id\", type text}, {\"meter_id\", type text}, {\"kind\", type text}, {\"event_date\", type date}, {\"severity\", type text}, {\"status\", type text}, {\"amount_cents\", Int64.Type}, {\"version\", Int64.Type}, {\"title\", type text}}, \"en-US\")",
+                "in",
+                "  Typed"
+              ]
+            }
+          }
+        ],
+        "measures": [
+          {
+            "name": "Active investigations",
+            "expression": "CALCULATE(COUNTROWS(fct_cases), fct_cases[status] IN {\"open\", \"investigating\"})",
+            "formatString": "#,0",
+            "description": "Synthetic demonstration; see docs/metric-definitions.md for grain and limitations."
+          },
+          {
+            "name": "Case count",
+            "expression": "COUNTROWS(fct_cases)",
+            "formatString": "#,0",
+            "description": "Synthetic demonstration; see docs/metric-definitions.md for grain and limitations."
+          },
+          {
+            "name": "Active amount to review EUR",
+            "expression": "DIVIDE(CALCULATE(SUM(fct_cases[amount_cents]), fct_cases[status] IN {\"open\", \"investigating\"}), 100)",
+            "formatString": "€ #,0.00",
+            "description": "Synthetic demonstration; see docs/metric-definitions.md for grain and limitations."
+          }
+        ]
+      },
+      {
+        "name": "fct_imports",
+        "columns": [
+          {
+            "name": "run_id",
+            "dataType": "string",
+            "sourceColumn": "run_id",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "file_name",
+            "dataType": "string",
+            "sourceColumn": "file_name",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "started_at",
+            "dataType": "dateTime",
+            "sourceColumn": "started_at",
+            "summarizeBy": "none",
+            "formatString": "yyyy-MM-dd"
+          },
+          {
+            "name": "status",
+            "dataType": "string",
+            "sourceColumn": "status",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "accepted",
+            "dataType": "int64",
+            "sourceColumn": "accepted",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "rejected",
+            "dataType": "int64",
+            "sourceColumn": "rejected",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "duplicates",
+            "dataType": "int64",
+            "sourceColumn": "duplicates",
+            "summarizeBy": "none"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "fct_imports",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "  Source = Csv.Document(File.Contents(DataFolder & \"/fct_imports.csv\"), [Delimiter=\",\", Columns=7, Encoding=65001, QuoteStyle=QuoteStyle.Csv]),",
+                "  Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),",
+                "  EmptyToNull = Table.ReplaceValue(Headers, \"\", null, Replacer.ReplaceValue, Table.ColumnNames(Headers)),",
+                "  Typed = Table.TransformColumnTypes(EmptyToNull, {{\"run_id\", type text}, {\"file_name\", type text}, {\"started_at\", type datetime}, {\"status\", type text}, {\"accepted\", Int64.Type}, {\"rejected\", Int64.Type}, {\"duplicates\", Int64.Type}}, \"en-US\")",
+                "in",
+                "  Typed"
+              ]
+            }
+          }
+        ],
+        "measures": [
+          {
+            "name": "Accepted rows",
+            "expression": "SUM(fct_imports[accepted])",
+            "formatString": "#,0",
+            "description": "Synthetic demonstration; see docs/metric-definitions.md for grain and limitations."
+          },
+          {
+            "name": "Quarantined rows",
+            "expression": "SUM(fct_imports[rejected])",
+            "formatString": "#,0",
+            "description": "Synthetic demonstration; see docs/metric-definitions.md for grain and limitations."
+          },
+          {
+            "name": "Acceptance rate",
+            "expression": "DIVIDE(SUM(fct_imports[accepted]), SUM(fct_imports[accepted]) + SUM(fct_imports[rejected]))",
+            "formatString": "0.00%",
+            "description": "Synthetic demonstration; see docs/metric-definitions.md for grain and limitations."
+          }
+        ]
+      },
+      {
+        "name": "network_daily",
+        "columns": [
+          {
+            "name": "reading_date",
+            "dataType": "dateTime",
+            "sourceColumn": "reading_date",
+            "summarizeBy": "none",
+            "formatString": "yyyy-MM-dd"
+          },
+          {
+            "name": "received_readings",
+            "dataType": "int64",
+            "sourceColumn": "received_readings",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "valid_intervals",
+            "dataType": "int64",
+            "sourceColumn": "valid_intervals",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "consumption_liters",
+            "dataType": "int64",
+            "sourceColumn": "consumption_liters",
+            "summarizeBy": "none"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "network_daily",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "  Source = Csv.Document(File.Contents(DataFolder & \"/network_daily.csv\"), [Delimiter=\",\", Columns=4, Encoding=65001, QuoteStyle=QuoteStyle.Csv]),",
+                "  Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),",
+                "  EmptyToNull = Table.ReplaceValue(Headers, \"\", null, Replacer.ReplaceValue, Table.ColumnNames(Headers)),",
+                "  Typed = Table.TransformColumnTypes(EmptyToNull, {{\"reading_date\", type date}, {\"received_readings\", Int64.Type}, {\"valid_intervals\", Int64.Type}, {\"consumption_liters\", Int64.Type}}, \"en-US\")",
+                "in",
+                "  Typed"
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "relationships": [
+      {
+        "name": "ab1b80e0-66d1-5e4b-af15-cd2efa0bb506",
+        "fromTable": "fct_consumption",
+        "fromColumn": "meter_id",
+        "toTable": "dim_meters",
+        "toColumn": "meter_id",
+        "crossFilteringBehavior": "oneDirection"
+      },
+      {
+        "name": "8061a4b5-bdfb-5cda-847e-bc6e486dd174",
+        "fromTable": "fct_billing",
+        "fromColumn": "meter_id",
+        "toTable": "dim_meters",
+        "toColumn": "meter_id",
+        "crossFilteringBehavior": "oneDirection"
+      },
+      {
+        "name": "52d51300-98ee-5c2f-8e87-c7b1d250d0e2",
+        "fromTable": "fct_cases",
+        "fromColumn": "meter_id",
+        "toTable": "dim_meters",
+        "toColumn": "meter_id",
+        "crossFilteringBehavior": "oneDirection"
+      },
+      {
+        "name": "e21860cb-75ac-5a98-87b9-2f80df49d02f",
+        "fromTable": "fct_consumption",
+        "fromColumn": "reading_date",
+        "toTable": "dim_date",
+        "toColumn": "calendar_date",
+        "crossFilteringBehavior": "oneDirection"
+      },
+      {
+        "name": "06b01084-25aa-590d-a11a-9eeef7736e97",
+        "fromTable": "fct_cases",
+        "fromColumn": "event_date",
+        "toTable": "dim_date",
+        "toColumn": "calendar_date",
+        "crossFilteringBehavior": "oneDirection"
+      },
+      {
+        "name": "685a56fa-f3a8-5423-8a21-875a5a037fd6",
+        "fromTable": "fct_billing",
+        "fromColumn": "period_end",
+        "toTable": "dim_date",
+        "toColumn": "calendar_date",
+        "crossFilteringBehavior": "oneDirection"
+      },
+      {
+        "name": "f490fc66-09e6-59dd-bf21-f3fd1a290ead",
+        "fromTable": "network_daily",
+        "fromColumn": "reading_date",
+        "toTable": "dim_date",
+        "toColumn": "calendar_date",
+        "crossFilteringBehavior": "oneDirection"
+      }
+    ],
+    "expressions": [
+      {
+        "name": "DataFolder",
+        "kind": "m",
+        "expression": "\"C:/AquaWatch/powerbi/data\" meta [IsParameterQuery=true, Type=\"Text\", IsParameterQueryRequired=true]"
+      }
+    ],
+    "annotations": [
+      {
+        "name": "PBI_QueryOrder",
+        "value": "[\"DataFolder\",\"dim_meters\",\"dim_date\",\"fct_consumption\",\"fct_billing\",\"fct_cases\",\"fct_imports\",\"network_daily\"]"
+      }
+    ]
+  }
+}

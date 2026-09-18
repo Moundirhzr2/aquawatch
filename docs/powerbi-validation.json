@@ -1,0 +1,68 @@
+{
+  "native_execution": {
+    "ValidatedAtUtc": "2026-09-13T12:53:26.9183002Z",
+    "EngineVersion": "17.0.83.18",
+    "ClientVersion": "19.117.0",
+    "NativeRefresh": "passed",
+    "NativeQueries": "passed",
+    "PbipOpening": "not_verified",
+    "VisualRendering": "not_verified"
+  },
+  "csv_parity": {
+    "status": "passed",
+    "scope": "Native engine Power Query refresh and DAX; visual rendering is not covered",
+    "measures_checked": 14,
+    "table_counts": {
+      "dim_date": 90,
+      "dim_meters": 120,
+      "fct_billing": 120,
+      "fct_cases": 25,
+      "fct_consumption": 10796,
+      "fct_imports": 1,
+      "network_daily": 90
+    },
+    "districts_checked": 4,
+    "dates_checked": 90,
+    "expected_unfiltered_measures": {
+      "Connected meters": 120,
+      "Consumption m3": 3955.375,
+      "Valid interval share": 0.9881437569470174,
+      "Reading count": 10796,
+      "Invoice amount to review EUR": 255.0,
+      "Billed amount EUR": 14142.84,
+      "Expected amount EUR": 13887.84,
+      "Flagged invoices": 6,
+      "Active investigations": 25,
+      "Case count": 25,
+      "Active amount to review EUR": 255.0,
+      "Accepted rows": 10796,
+      "Quarantined rows": 8,
+      "Acceptance rate": 0.9992595335061089
+    },
+    "csv_sha256": {
+      "dim_date.csv": "e7d929fe8b7b07dd66a9d4041a60324c250800252218477f65ceed2302d45935",
+      "dim_meters.csv": "3b7673b7c2d2e5e87c11fbc1f604a9a6dbe043305e7e5fb093aee1def4a68f6b",
+      "fct_billing.csv": "fd2d1282e2c0e0c60357e0ef9b5768bdc50af86599489e1da6ae913b81892bee",
+      "fct_cases.csv": "00f3e6d88e551af576d929209a4dcdebe18dab91b04a4bd93adab13cf457d980",
+      "fct_consumption.csv": "3cd54bfe054d19cd92388e3d2669db0f5c0b56d28a063af3a69fb1d54b21945a",
+      "fct_imports.csv": "b938cc31643c65792f1231c250cbc05318e89b735c6bac0469bd6fd522a8f8ba",
+      "network_daily.csv": "624769e704df60360dc61a9f3a6709881c3f3f735347b1e6df24154e3150de2e"
+    }
+  },
+  "observed_measures": {
+    "[Connected meters]": 120,
+    "[Consumption m3]": 3955.375,
+    "[Valid interval share]": 0.9881437569470174,
+    "[Reading count]": 10796,
+    "[Invoice amount to review EUR]": 255.0,
+    "[Billed amount EUR]": 14142.84,
+    "[Expected amount EUR]": 13887.84,
+    "[Flagged invoices]": 6,
+    "[Active investigations]": 25,
+    "[Case count]": 25,
+    "[Active amount to review EUR]": 255.0,
+    "[Accepted rows]": 10796,
+    "[Quarantined rows]": 8,
+    "[Acceptance rate]": 0.9992595335061089
+  }
+}

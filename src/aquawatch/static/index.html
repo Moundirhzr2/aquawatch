@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="AquaWatch: explainable water consumption and billing investigations. A synthetic data portfolio project by Moundir Houazar.">
+  <title>AquaWatch · Utility intelligence</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='12' fill='%23106e68'/%3E%3Ctext x='10' y='29' fill='white' font-family='Arial' font-size='27'%3EA%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/static/styles.css">
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+<a href="#main" class="skip">Skip to content</a>
+<aside class="sidebar">
+  <a class="brand" href="#overview" aria-label="AquaWatch overview"><span class="brand-mark">a<span>≈</span></span><span>AquaWatch<small>UTILITY INTELLIGENCE</small></span></a>
+  <div class="workspace"><span class="workspace-icon">M</span><div>Mulhouse network<small>Synthetic demonstration</small></div><span class="live-dot"></span></div>
+  <p class="nav-label">WORKSPACE</p>
+  <nav aria-label="Main navigation">
+    <a href="#overview" class="nav-link active" data-view="overview"><span class="nav-icon">◫</span> Overview</a>
+    <a href="#investigations" class="nav-link" data-view="investigations"><span class="nav-icon">⌕</span> Investigations <span id="nav-count" class="nav-count">—</span></a>
+    <a href="#pipeline" class="nav-link" data-view="pipeline"><span class="nav-icon">⇄</span> Data pipeline</a>
+    <a href="#methodology" class="nav-link" data-view="methodology"><span class="nav-icon">◎</span> Model & evidence</a>
+  </nav>
+  <div class="sidebar-bottom"><div class="demo-badge"><span class="live-dot"></span> SYNTHETIC DATA ONLY</div><p>From raw readings<br>to informed decisions.</p><div class="author"><span class="avatar">MH</span><div>Moundir Houazar<small>Data engineering portfolio</small></div></div></div>
+</aside>
+<div class="main-shell">
+  <header class="topbar"><div><span class="crumb">Workspace</span><span class="slash">/</span><span id="breadcrumb">Overview</span></div><div class="topbar-right"><span class="status-dot"></span><span id="connection">Connecting…</span><a href="/docs" target="_blank" rel="noreferrer">API docs ↗</a></div></header>
+  <main id="main" tabindex="-1">
+    <div id="load-error" class="error-banner" hidden></div>
+    <section id="view-overview" class="view">
+      <div class="page-heading"><div><p class="eyebrow">THE NETWORK AT A GLANCE</p><h1>Every reading tells a story.</h1><p class="subtitle">Find the exceptions. Understand the evidence. Take the next step.</p></div><button class="button primary import-demo">↻ <span>Run daily import</span></button></div>
+      <div class="period-line"><span class="pill">Demonstration network</span><span id="period">Loading observation period…</span><span class="right muted">Daily readings · EUR · m³</span></div>
+      <div class="metrics" id="metrics"><div class="metric"><span>Loading network</span><strong>—</strong></div></div>
+      <div class="chart-grid">
+        <article class="panel consumption-panel"><div class="panel-head"><div><h2>Consumption across the network</h2><p>Valid daily intervals only; resets and gaps excluded</p></div><span class="legend"><i></i> Consumption</span></div><div id="network-chart" class="network-chart"></div><div class="chart-foot"><span><i class="small-dot"></i> Elevated consumption warrants investigation</span><a href="#methodology">How we calculate this ↗</a></div></article>
+        <article class="panel breakdown"><div class="panel-head"><div><h2>What needs attention</h2><p>Open and investigating cases</p></div></div><div id="kind-breakdown"></div><div class="breakdown-footer"><span class="small-label">AN INVESTIGATION, NOT A VERDICT</span><p>Alerts explain what changed.<br>An operator decides what it means.</p></div></article>
+      </div>
+      <article class="panel"><div class="panel-head"><div><h2>Priority investigations <span class="small-pill" id="priority-count">—</span></h2><p>High priority first, then invoice amount requiring review</p></div><a href="#investigations" class="text-link">View all cases →</a></div><div id="priority-table" class="table-scroll"></div></article>
+      <div class="provenance-strip"><span class="provenance-icon">✓</span><div><strong>Traceable by design</strong><span>Every reading links to an import. Every decision leaves a history.</span></div><a href="#pipeline">Explore the pipeline →</a></div>
+    </section>
+    <section id="view-investigations" class="view" hidden>
+      <div class="page-heading"><div><p class="eyebrow">FROM ALERT TO ACTION</p><h1>Investigation queue</h1><p class="subtitle">Understand each exception before deciding what comes next.</p></div><a class="button secondary" href="/api/export/cases.csv">↓ Export cases</a></div>
+      <div class="filters"><label class="search-label"><span class="sr-only">Search investigations</span><input id="case-search" type="search" placeholder="Search meter, site or district…"></label><label>Status<select id="status-filter"><option value="active">Active cases</option value="all">All statuses</option><option value="open">Open</option><option value="investigating">Investigating</option><option value="resolved">Resolved</option><option value="dismissed">Dismissed</option></select></label><label>Exception<select id="kind-filter"><option value="all">All exception types</option><option value="sustained_usage">Sustained consumption</option><option value="meter_reset">Counter reset</option><option value="missing_reading">Missing reading</option><option value="billing_mismatch">Billing mismatch</option><option value="duplicate_reading">Duplicate reading</option></select></label></div>
+      <article class="panel"><div class="panel-head"><h2 id="queue-label">Cases</h2><span class="muted">Select a case to inspect its evidence</span></div><div id="case-table" class="table-scroll"></div></article>
+    </section>
+    <section id="view-pipeline" class="view" hidden>
+      <div class="page-heading"><div><p class="eyebrow">RELIABILITY YOU CAN INSPECT</p><h1>From source to signal.</h1><p class="subtitle">Validate, quarantine and preserve the origin of every reading.</p></div><button class="button primary import-demo">↻ <span>Run daily import</span></button></div>
+      <div class="pipeline-steps"><div><b>01</b><h3>Receive</h3><p>CSV · UTF-8 · SHA-256</p></div><span>→</span><div><b>02</b><h3>Validate</h3><p>Schema · dates · meters</p></div><span>→</span><div><b>03</b><h3>Store</h3><p>Atomic batch · quarantine</p></div><span>→</span><div><b>04</b><h3>Investigate</h3><p>Rules · evidence · history</p></div></div>
+      <div class="upload-grid"><article class="panel upload-panel"><h2>Import a readings file</h2><p>Use known meter IDs and cumulative counters in liters. Maximum 5 MB. Existing records are preserved.</p><form id="upload-form"><label>CSV file<input id="csv-file" type="file" accept=".csv,text/csv" required></label><label>Observation cutoff<input id="as-of" type="date" value="2026-08-30" required></label><button class="button primary" type="submit">Validate & import →</button><a href="/api/sample.csv">Download a valid sample</a></form></article><article class="panel contract-panel"><p class="eyebrow">THE DATA CONTRACT</p><h2>One meter. One date. One reading.</h2><code>meter_id,reading_date,counter_liters<br>M-0001,2026-08-30,543210</code><p>Duplicates, unknown meters and malformed values go into quarantine. A broken file structure rolls back the whole batch.</p><p class="muted">Replay the exact same file to verify idempotency. The original run is returned, with no new rows or cases.</p></article></div>
+      <article class="panel"><div class="panel-head"><div><h2>Import history</h2><p>Click a run to inspect quarantined records</p></div></div><div id="runs-table" class="table-scroll"></div></article>
+    </section>
+    <section id="view-methodology" class="view" hidden>
+      <div class="page-heading"><div><p class="eyebrow">EXPLAINABLE BY DESIGN</p><h1>Evidence before confidence.</h1><p class="subtitle">Conservative rules, measurable results and explicit limitations.</p></div><span class="pill">Rule version 1.0.0</span></div>
+      <div id="evaluation-metrics" class="metrics"></div>
+      <div class="method-grid"><article class="panel prose"><h2>How the rules work</h2><dl><dt>Sustained unusual consumption</dt><dd>Three consecutive daily values above both 3× the preceding 14-day median and that median + 250 L. At least 10 valid baseline intervals are required.</dd><dt>Counter moved backwards</dt><dd>A cumulative reading decreases. The interval is excluded from consumption; a reset, replacement or input error needs review.</dd><dt>Missing readings</dt><dd>At least one daily reading is absent between observations or before the explicit observation cutoff.</dd><dt>Billing mismatch</dt><dd>Recompute the invoice from its stated volume and tariff, with integer cents and half-up rounding. Differences greater than €0.01 are flagged.</dd><dt>Duplicate reading</dt><dd>A meter/date pair already exists. The incoming row is quarantined, including conflicting counter values.</dd></dl></article><article class="panel prose"><h2>What the benchmark means</h2><p>Results below come from the fixed synthetic dataset, independently of your current investigation decisions or additional uploads.</p><div id="evaluation-table"></div><div class="callout"><strong>Designed to reveal limitations</strong><p>The fixture includes subtle 1.5× consumption events that the conservative rule can miss. A high score on synthetic data does not establish real-world performance.</p></div><p>Evaluation matches exact meter, exception type and event start date. The generator and detector live in separate modules; labels never enter the detector.</p><p>Invoice checks validate tariff arithmetic against stated volume. They do not verify the billed volume against meter records across resets, gaps or tariff changes.</p></article></div>
+    </section>
+    <footer><span>AquaWatch <span class="muted">/</span> Built by Moundir Houazar</span><span>Independent portfolio project · No affiliation with a utility company</span></footer>
+  </main>
+</div>
+<dialog id="case-dialog" aria-labelledby="case-title"><div class="dialog-top"><span class="eyebrow" id="case-meter">INVESTIGATION</span><button class="icon-button close-dialog" aria-label="Close investigation">×</button></div><div id="case-content"></div></dialog>
+<dialog id="run-dialog" aria-labelledby="run-title"><div class="dialog-top"><h2 id="run-title">Quarantined records</h2><button class="icon-button close-dialog" aria-label="Close import details">×</button></div><div id="run-content"></div></dialog>
+<div id="toast" role="status" aria-live="polite" hidden></div>
+</body></html>

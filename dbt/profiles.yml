@@ -1,0 +1,18 @@
+aquawatch:
+  target: local
+  outputs:
+    local:
+      type: duckdb
+      path: runtime/analytics.duckdb
+      schema: main
+      threads: 2
+    postgres:
+      type: postgres
+      host: "{{ env_var('PGHOST', '127.0.0.1') }}"
+      port: "{{ env_var('PGPORT', '5432') | int }}"
+      user: "{{ env_var('PGUSER', 'aquawatch') }}"
+      password: "{{ env_var('PGPASSWORD', '') }}"
+      dbname: "{{ env_var('PGDATABASE', 'aquawatch') }}"
+      schema: analytics
+      threads: 2
+      connect_timeout: 10

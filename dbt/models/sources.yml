@@ -1,0 +1,13 @@
+version: 2
+sources:
+  - name: operational
+    description: "Operational AquaWatch tables. Synthetic data only. PostgreSQL target reads directly; local target reads exported seeds."
+    schema: public
+    tables:
+      - name: customers
+      - name: meters
+      - name: tariffs
+      - name: invoices
+      - name: readings
+      - name: cases
+      - name: ingestion_runs

@@ -1,0 +1,23 @@
+{
+  "name": "AquaWatch",
+  "dataColors": [
+    "#146B5B",
+    "#91AC82",
+    "#C6AE6F",
+    "#65868D",
+    "#B45345"
+  ],
+  "background": "#F5F7F6",
+  "foreground": "#172D35",
+  "tableAccent": "#146B5B",
+  "textClasses": {
+    "title": {
+      "fontFace": "Segoe UI",
+      "color": "#172D35"
+    },
+    "label": {
+      "fontFace": "Segoe UI",
+      "color": "#526A60"
+    }
+  }
+}

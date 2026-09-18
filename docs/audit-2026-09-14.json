@@ -1,0 +1,41 @@
+{
+  "date": "2026-09-14",
+  "sqlite_tests": 27,
+  "postgresql_tests": 27,
+  "pytest_version": "9.0.3",
+  "duckdb_data_tests": 30,
+  "postgresql_data_tests": 30,
+  "browser": "passed",
+  "model_result_comparison": "passed_against_previous_native_results",
+  "advisory_check": {
+    "source": "https://api.osv.dev/v1/querybatch",
+    "packages_checked": 85,
+    "findings": []
+  },
+  "docker_recheck": "incomplete_engine_unresponsive",
+  "docker_cleanup": "unconfirmed_engine_unresponsive",
+  "prior_docker_pass": "2026-09-13",
+  "remote_ci": "not_run",
+  "published": false,
+  "docker_followup": {
+    "date": "2026-09-14",
+    "client_version": "29.7.2",
+    "compose_configuration": "passed",
+    "engine_version_and_info": "timed_out",
+    "desktop_restart": "failed_to_stop_processes",
+    "docker_desktop_wsl_termination": "timed_out",
+    "force_close": "not_executed_auto_review_rejected_pending_user_approval",
+    "native_api_health": "ok_postgresql"
+  },
+  "docker_after_user_reopen": {
+    "engine": "unavailable",
+    "wsl_distribution": "stopped",
+    "startup_error": "Wsl/Service/AttachDisk/CreateVm/HCS/0x800705aa",
+    "free_physical_memory_mib": 1979,
+    "wsl_memory_cap": "4GB saved; successful restart not confirmed",
+    "supported_restart": "failed_to_stop",
+    "host_diagnostic_launch_error": "CryptUnprotectData failed: 1453",
+    "native_api": "healthy_postgresql",
+    "container_recheck": "not_run_engine_unavailable"
+  }
+}

@@ -1,0 +1,85 @@
+version: 2
+models:
+  - name: stg_readings
+    description: "One accepted cumulative meter reading per meter and date, with its previous observation."
+    columns:
+      - name: reading_id
+        data_tests: [unique, not_null]
+      - name: counter_liters
+        data_tests: [not_null]
+  - name: dim_meters
+    description: "One synthetic meter and its customer segment and district."
+    columns:
+      - name: meter_id
+        data_tests: [unique, not_null]
+      - name: segment
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [Residential, Commercial]
+  - name: fct_consumption
+    description: "One observation per meter/date. Consumption is null across gaps, resets and the first observation. Grain is not an invoice period."
+    columns:
+      - name: reading_id
+        data_tests: [unique, not_null]
+      - name: meter_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_meters')
+                field: meter_id
+      - name: reading_date
+        data_tests: [not_null]
+      - name: interval_status
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [valid, initial, gap, counter_reset]
+  - name: fct_billing
+    description: "One invoice; tariff arithmetic only. Review amounts are neither recovered revenue nor confirmed savings."
+    columns:
+      - name: invoice_id
+        data_tests: [unique, not_null]
+      - name: meter_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_meters')
+                field: meter_id
+  - name: fct_cases
+    description: "One stable investigation event per meter/type/start date; operational human status is preserved."
+    columns:
+      - name: case_id
+        data_tests: [unique, not_null]
+      - name: status
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [open, investigating, resolved, dismissed]
+      - name: meter_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_meters')
+                field: meter_id
+  - name: fct_imports
+    description: "One file-content hash ingestion attempt. Exact replays do not produce additional rows."
+    columns:
+      - name: run_id
+        data_tests: [unique, not_null]
+      - name: status
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [running, completed, failed]
+  - name: network_daily
+    description: "Daily network consumption and the number of valid intervals contributing to it."
+    columns:
+      - name: reading_date
+        data_tests: [unique, not_null]
+  - name: dim_date
+    description: "Dates represented in accepted readings. Sufficient for this synthetic observation period, not a perpetual calendar."
+    columns:
+      - name: calendar_date
+        data_tests: [unique, not_null]

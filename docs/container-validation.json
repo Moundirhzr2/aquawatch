@@ -1,0 +1,30 @@
+{
+  "date": "2026-09-13",
+  "project_checklist_status": "complete_based_on_2026-09-13_pass",
+  "checklist_updated": "2026-09-18",
+  "execution": "local",
+  "command": "python scripts/check_containers.py",
+  "exit_code": 0,
+  "platform": "Docker Desktop on Windows, WSL 2 Linux engine",
+  "database": "PostgreSQL 17",
+  "checks": {
+    "image_build": "passed",
+    "postgresql_api_health": "passed",
+    "baseline_meters": 120,
+    "baseline_readings": 10796,
+    "investigation_status_and_note_survive_app_restart": "passed",
+    "restart_preserves_reading_and_ingestion_run_counts": "passed",
+    "dbt_models": 8,
+    "dbt_seeds": 7,
+    "dbt_data_tests_passed": 30,
+    "python_sql_parity_observations": 10796,
+    "python_sql_parity_invoices": 120,
+    "nonempty_csv_exports": 7,
+    "temporary_containers_network_and_volume_cleanup": "passed"
+  },
+  "limitations": [
+    "All business data are synthetic.",
+    "Remote GitHub Actions has not been run.",
+    "This container check does not validate Power BI; see the separate native model validation record."
+  ]
+}

@@ -1,0 +1,26 @@
+case_id,meter_id,kind,event_date,severity,status,amount_cents,version,title
+c6e570c7f36033b0,M-0001,sustained_usage,2026-08-21,high,open,0,1,Sustained unusual consumption
+d9c8b0cf8db264e1,M-0002,sustained_usage,2026-08-21,high,open,0,1,Sustained unusual consumption
+61037b91d4754051,M-0003,sustained_usage,2026-08-21,high,open,0,1,Sustained unusual consumption
+07e815bfbb8118d9,M-0004,sustained_usage,2026-08-21,high,open,0,1,Sustained unusual consumption
+1de7a798590d8f29,M-0005,sustained_usage,2026-08-21,high,open,0,1,Sustained unusual consumption
+5dacd37407d1545b,M-0006,sustained_usage,2026-08-21,high,open,0,1,Sustained unusual consumption
+29bc48990f4b24b6,M-0007,meter_reset,2026-08-25,high,open,0,1,Counter moved backwards
+8f1cdcb7f2a17e05,M-0008,meter_reset,2026-08-25,high,open,0,1,Counter moved backwards
+93ed9e668d93fe12,M-0009,meter_reset,2026-08-25,high,open,0,1,Counter moved backwards
+ae30c1f1dbfd96e6,M-0010,meter_reset,2026-08-25,high,open,0,1,Counter moved backwards
+bdcd88cf8affbda7,M-0011,missing_reading,2026-08-26,medium,open,0,1,Missing meter reading
+f2ff8b301e33295b,M-0012,missing_reading,2026-08-26,medium,open,0,1,Missing meter reading
+0fe1f4c630affb23,M-0013,missing_reading,2026-08-26,medium,open,0,1,Missing meter reading
+1e4d4b36cab8298d,M-0014,missing_reading,2026-08-26,medium,open,0,1,Missing meter reading
+d7cbe35c16493baf,M-0015,billing_mismatch,2026-08-29,high,open,4000,1,Invoice does not match tariff
+4423a8ad8a3a15cb,M-0016,billing_mismatch,2026-08-29,high,open,4100,1,Invoice does not match tariff
+2fd26a8ef446bb91,M-0017,billing_mismatch,2026-08-29,high,open,4200,1,Invoice does not match tariff
+4e9480c130cb069d,M-0018,billing_mismatch,2026-08-29,high,open,4300,1,Invoice does not match tariff
+1b7c3f3763e9e719,M-0019,billing_mismatch,2026-08-29,high,open,4400,1,Invoice does not match tariff
+dd80c6c5adbb4225,M-0020,billing_mismatch,2026-08-29,high,open,4500,1,Invoice does not match tariff
+13e6872cfc66d8d0,M-0031,duplicate_reading,2026-08-29,medium,open,0,1,Duplicate or conflicting reading
+03da6b78d1e6dbdb,M-0032,duplicate_reading,2026-08-29,medium,open,0,1,Duplicate or conflicting reading
+76118a1f396e92ee,M-0033,duplicate_reading,2026-08-29,medium,open,0,1,Duplicate or conflicting reading
+f0f5e7f975c283bf,M-0034,duplicate_reading,2026-08-29,medium,open,0,1,Duplicate or conflicting reading
+c145f82a258ac8d3,M-0035,duplicate_reading,2026-08-29,medium,open,0,1,Duplicate or conflicting reading
