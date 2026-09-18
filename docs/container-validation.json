@@ -1,11 +1,14 @@
 {
-  "date": "2026-09-13",
-  "project_checklist_status": "complete_based_on_2026-09-13_pass",
+  "date": "2026-09-18",
+  "project_checklist_status": "complete",
   "checklist_updated": "2026-09-18",
-  "execution": "local",
+  "execution": "GitHub Actions containers job",
+  "evidence_url": "https://github.com/Moundirhzr2/aquawatch/actions/runs/35387494061/job/105737702671",
+  "tested_commit": "ed78f837da302bc62e78a37e6e6afe5f3d1c4c8a",
+  "prior_local_pass": "2026-09-13",
   "command": "python scripts/check_containers.py",
   "exit_code": 0,
-  "platform": "Docker Desktop on Windows, WSL 2 Linux engine",
+  "platform": "GitHub-hosted ubuntu-latest, Docker Compose",
   "database": "PostgreSQL 17",
   "checks": {
     "image_build": "passed",
@@ -24,7 +27,7 @@
   },
   "limitations": [
     "All business data are synthetic.",
-    "Remote GitHub Actions has not been run.",
+    "This records the successful containers job; other workflow jobs have separate results.",
     "This container check does not validate Power BI; see the separate native model validation record."
   ]
 }

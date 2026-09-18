@@ -1,5 +1,7 @@
 # Contributing
 
+`main` is protected. Create a branch and open a pull request; direct pushes, force pushes and branch deletion are blocked, including for administrators. All four checks must pass: `local (ubuntu-latest)`, `local (windows-latest)`, `postgres`, and `containers`. The branch must be up to date and review conversations resolved. External approval is not required for this solo portfolio project.
+
 Use Python 3.12, create a virtual environment, and install `.[dev,analytics]` with `requirements.lock` as constraints. Keep changes focused, use synthetic fixtures and run the relevant tests before opening a pull request.
 
 Changes to ingestion or case state need tests for failure behavior as well as successful behavior. Changes to consumption calculations should address resets, missing intervals and the first observation. Changes to dbt models need both DuckDB and PostgreSQL validation when available. Do not silently update the benchmark labels to make a new detector pass.
