@@ -28,7 +28,7 @@ jobs:
       - run: python scripts/check_analytics.py
       - run: python scripts/build_powerbi.py
       - run: python scripts/check_repository.py
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: '22'
           cache: npm
