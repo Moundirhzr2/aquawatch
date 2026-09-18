@@ -1,0 +1,35 @@
+{
+  "date": "2026-09-18",
+  "repository": "https://github.com/Moundirhzr2/aquawatch",
+  "ci": {
+    "run_url": "https://github.com/Moundirhzr2/aquawatch/actions/runs/35387808735",
+    "commit": "52eb45abb7e8e57d3cd12c88b76650a3ada44424",
+    "conclusion": "success",
+    "jobs": ["local (ubuntu-latest)", "local (windows-latest)", "postgres", "containers"]
+  },
+  "powerbi": {
+    "validated_at_utc": "2026-09-18T19:54:02.7597981Z",
+    "native_refresh": "passed",
+    "native_measures": 14,
+    "table_counts": 7,
+    "district_groups": 4,
+    "date_groups": 90,
+    "flagged_invoices_empty_selection": 0,
+    "flagged_invoices_unflagged_invoice": 0,
+    "flagged_invoices_flagged_invoice": 1,
+    "new_visual_rendering": "not_verified"
+  },
+  "dependency_advisories": {"provider": "OSV", "locked_packages": 85, "findings": []},
+  "main_protection": {
+    "verified_via_api": true,
+    "pull_request_required": true,
+    "required_checks": ["local (ubuntu-latest)", "local (windows-latest)", "postgres", "containers"],
+    "up_to_date_required": true,
+    "enforced_for_admins": true,
+    "force_pushes_allowed": false,
+    "deletion_allowed": false,
+    "conversation_resolution_required": true,
+    "external_approvals_required": 0
+  },
+  "limitations": ["Synthetic demonstration data", "No hosted production deployment", "No operating-system vulnerability scan"]
+}

@@ -1,5 +1,7 @@
 # AquaWatch
 
+[![AquaWatch checks](https://github.com/Moundirhzr2/aquawatch/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Moundirhzr2/aquawatch/actions/workflows/ci.yml)
+
 **Explainable water-consumption and billing investigations.**
 
 A data engineering and analytics portfolio project by **Moundir Houazar**, inspired by experience working with meter-data quality. AquaWatch turns incoming readings into validated records, explained alerts and a traceable investigation workflow.

@@ -25,7 +25,7 @@ The [14 September full audit](audit-2026-09-14.md) reran application tests, brow
 | WSL installation | WSL 2.7.13.0 verified; activation completed after the Windows restart; Docker's WSL 2 distribution runs successfully |
 | Compose configuration | The isolated integration check passed `--config-only` using the installed Compose CLI |
 | Docker image and Compose execution | **Passed locally on 2026-09-13**: image build, healthy PostgreSQL/API, saved decision across app restart, ingestion replay, dbt tests, SQL parity and seven CSV exports; temporary containers and volumes removed successfully |
-| Remote CI and source publication | Source published; Linux, PostgreSQL and Docker jobs passed in the initial run. The Windows launch fix is undergoing a subsequent full workflow. See the publication verification record for dated results. No hosted web application deployment is claimed |
+| Remote CI and source publication | Source published; all four jobs passed in the corrected workflow on 2026-09-18: Linux, Windows, PostgreSQL and Docker. See the publication verification record for the run and commit. No hosted web application deployment is claimed |
 
 The application test suite verifies exact replay, row conflicts, malformed-input quarantine, whole-batch rollback, invalid/future dates, integer rounding, counter/gap handling, conservative detection, known misses, case revision conflicts and persistent history.
 
