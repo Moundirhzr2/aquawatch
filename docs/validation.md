@@ -1,10 +1,10 @@
 # Validation record
 
-Project checklist updated on 2026-09-18: Docker verification is complete based on the successful 2026-09-13 integration run recorded in `container-validation.json`. Subsequent unsuccessful rechecks remain documented in the audit; no new run is claimed.
+Project checklist updated on 2026-09-18: source published on GitHub, main branch protected, and a fresh remote Docker integration run passed. See the [publication verification record](release-2026-09-18.md) and [container evidence](container-validation.json). Earlier local engine failures remain historical records.
 
-Power BI finishing change on 2026-09-18: `Flagged invoices` now wraps the filtered count in `COALESCE(..., 0)` so an empty selection returns zero. Updated the source model, generator and all three local report copies. Desktop rendering of this change has not been rechecked.
+Power BI finishing change on 2026-09-18: `Flagged invoices` now wraps the filtered count in `COALESCE(..., 0)` so an empty selection returns zero. Updated the source model, generator and all three local report copies. A fresh native model check passed all 14 measures and explicitly verified empty/unflagged/flagged selections as 0/0/1. Desktop rendering of this change has not been rechecked.
 
-Validated locally on Windows with Python 3.12.14. Commands and scripts are included so results can be reproduced. GitHub Actions has not yet been run remotely.
+Validated locally on Windows with Python 3.12.14 and through [GitHub Actions](https://github.com/Moundirhzr2/aquawatch/actions/workflows/ci.yml). Commands and scripts are included so results can be reproduced; dated remote results are recorded in the publication verification record.
 
 The [14 September full audit](audit-2026-09-14.md) reran application tests, browser workflows, both analytics targets, dependency checks and release-file checks. It fixed malformed-token handling and updated pytest to 9.0.3. Docker's fresh recheck stalled because the engine was unresponsive; its 13 September pass below remains historical evidence.
 
@@ -25,7 +25,7 @@ The [14 September full audit](audit-2026-09-14.md) reran application tests, brow
 | WSL installation | WSL 2.7.13.0 verified; activation completed after the Windows restart; Docker's WSL 2 distribution runs successfully |
 | Compose configuration | The isolated integration check passed `--config-only` using the installed Compose CLI |
 | Docker image and Compose execution | **Passed locally on 2026-09-13**: image build, healthy PostgreSQL/API, saved decision across app restart, ingestion replay, dbt tests, SQL parity and seven CSV exports; temporary containers and volumes removed successfully |
-| Remote CI and public hosting | Not run or published |
+| Remote CI and source publication | Source published; Linux, PostgreSQL and Docker jobs passed in the initial run. The Windows launch fix is undergoing a subsequent full workflow. See the publication verification record for dated results. No hosted web application deployment is claimed |
 
 The application test suite verifies exact replay, row conflicts, malformed-input quarantine, whole-batch rollback, invalid/future dates, integer rounding, counter/gap handling, conservative detection, known misses, case revision conflicts and persistent history.
 
@@ -35,6 +35,6 @@ An additional Python/SQL parity check passed for 10,796 baseline observations an
 
 Native M/DAX execution was verified using a temporary database on the local Power BI Desktop model engine, separate from the report database. All seven relationships were exercised through district/date query results. The source culture and model definitions were preserved; only the CSV path was configured for the local snapshot. The [Power BI validation guide](powerbi-validation.md) and [evidence summary](powerbi-validation.json) describe reproduction and scope. Separately, user screenshots confirm PBIP opening, Desktop refresh and all three populated pages. The updated formatting on all three pages is also confirmed, including exact card totals and readable table headers. The user manually confirmed that Billing review district selections update the linked visuals.
 
-The container check passed using a uniquely named project, random temporary credentials, available loopback ports and a temporary export mount. It verified API startup on PostgreSQL, decision persistence and ingestion idempotency across an app restart, followed by 30 passing dbt tests, SQL parity for 10,796 observations and 120 invoices, and seven nonempty CSV exports. Its exit code was 0, including cleanup. See the [container validation summary](container-validation.json) and [Windows setup](windows-setup.md) for reproduction. The GitHub Actions job invokes the same script but has not yet run remotely.
+The container check passed using a uniquely named project, random temporary credentials, available loopback ports and a temporary export mount. It verified API startup on PostgreSQL, decision persistence and ingestion idempotency across an app restart, followed by 30 passing dbt tests, SQL parity for 10,796 observations and 120 invoices, and seven nonempty CSV exports. Its exit code was 0, including cleanup. See the [container validation summary](container-validation.json) and [Windows setup](windows-setup.md) for reproduction. The GitHub Actions containers job ran the same script successfully on 18 September.
 
 The setup encountered third-party deprecation notices in the FastAPI/Starlette test-client dependencies; tests still passed. No production readiness, real-world detection performance, independent data validation or financial benefit is claimed.

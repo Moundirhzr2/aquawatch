@@ -50,7 +50,7 @@ The credential generator refuses to overwrite an existing `.env`. App and databa
 
 For an isolated integration check, run `python scripts/check_containers.py`. It creates a uniquely named Compose project with temporary credentials, available loopback ports and temporary exports. It checks the PostgreSQL-backed API, a decision surviving an app restart, unchanged ingestion counts, dbt tests, Python/SQL parity and seven CSV exports. It removes only its own containers and volumes afterward. Add `--config-only` to validate the configuration without starting containers.
 
-Docker verification is complete based on the full Compose integration check passed locally on 2026-09-13 with Docker Desktop and WSL 2, including the image build, app restart, PostgreSQL persistence, dbt and exports. Later rechecks were blocked by the local engine; no newer container pass is claimed. Native PostgreSQL was also tested separately. See [Windows setup](docs/windows-setup.md) and the [validation record](docs/validation.md).
+Docker verification passed locally on 2026-09-13 and again in the GitHub Actions containers job on 2026-09-18, including the image build, app restart, PostgreSQL persistence, dbt and exports. Native PostgreSQL was also tested separately. See [container evidence](docs/container-validation.json), [Windows setup](docs/windows-setup.md) and the [validation record](docs/validation.md).
 
 To connect the application to an existing PostgreSQL database, set `DATABASE_URL=postgresql+psycopg://USER:PASSWORD@HOST:PORT/DATABASE`. For dbt/export also set `PGHOST`, `PGPORT`, `PGUSER`, `PGPASSWORD` and `PGDATABASE`. Use a separate database for this demonstration.
 
@@ -119,9 +119,9 @@ npm run test:browser
 
 Browser checks launch a disposable local database and test server on port 8011. They exercise filtering, persistent decisions, replay, quarantine, benchmark rendering and mobile overflow. Set `AQUAWATCH_PYTHON` to your virtual environment's Python if it is not active. Set `AQUAWATCH_BROWSER_CHANNEL=msedge` to use an installed Edge browser.
 
-GitHub Actions includes Linux/Windows checks, a real PostgreSQL service, dbt builds, browser tests and an isolated Compose integration job. Workflow files are included; no successful remote CI run is claimed before publication.
+GitHub Actions includes Linux/Windows checks, a real PostgreSQL service, dbt builds, browser tests and an isolated Compose integration job. See the [live workflow results](https://github.com/Moundirhzr2/aquawatch/actions/workflows/ci.yml) and the dated [validation record](docs/validation.md).
 
-See the [14 September audit](docs/audit-2026-09-14.md) for the latest fixes and verification: 27 tests on each database, both analytics targets and browser workflows passed. A fresh Docker recheck was incomplete because the local engine stopped responding; the earlier container pass is documented separately.
+See the [18 September publication verification](docs/release-2026-09-18.md) for remote execution, branch protection and the latest native Power BI checks. The [14 September audit](docs/audit-2026-09-14.md) records the earlier application fixes and local results.
 
 ## Repository map
 

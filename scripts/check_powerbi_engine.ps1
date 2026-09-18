@@ -67,6 +67,7 @@ try {
     $fields = @($modelDocument.model.tables.measures | Where-Object { $_ } | ForEach-Object { '"' + $_.name + '", [' + $_.name + ']' })
     $queries = [ordered]@{
         measures = ('EVALUATE ROW(' + ($fields -join ', ') + ')')
+        flagged_invoice_edges = 'EVALUATE ROW("empty", CALCULATE([Flagged invoices], fct_billing[invoice_id] = "__no_invoice__"), "unflagged", CALCULATE([Flagged invoices], fct_billing[invoice_id] = "INV-0001"), "flagged", CALCULATE([Flagged invoices], fct_billing[invoice_id] = "INV-0015"))'
         tables = ('EVALUATE ROW(' + (($modelDocument.model.tables | ForEach-Object { '"' + $_.name + '", COUNTROWS(' + $_.name + ')' }) -join ', ') + ')')
         districts = 'EVALUATE SUMMARIZECOLUMNS(dim_meters[district], "readings", COUNTROWS(fct_consumption), "liters", SUM(fct_consumption[consumption_liters]), "cases", COALESCE(COUNTROWS(fct_cases),0), "invoices", COALESCE(COUNTROWS(fct_billing),0))'
         dates = 'EVALUATE SUMMARIZECOLUMNS(dim_date[calendar_date], "readings", COUNTROWS(fct_consumption), "liters", SUM(fct_consumption[consumption_liters]), "cases", COALESCE(COUNTROWS(fct_cases),0), "invoices", COALESCE(COUNTROWS(fct_billing),0), "network_rows", COUNTROWS(network_daily))'
@@ -85,7 +86,12 @@ try {
                 $rows += [PSCustomObject]$row
             }
         } finally { $reader.Close() }
-        if ($entry.Key -eq 'measures') {
+        if ($entry.Key -eq 'flagged_invoice_edges') {
+            if ($rows.Count -ne 1 -or $null -eq $rows[0].'[empty]' -or $null -eq $rows[0].'[unflagged]' -or $rows[0].'[empty]' -ne 0 -or $rows[0].'[unflagged]' -ne 0 -or $rows[0].'[flagged]' -ne 1) {
+                throw 'Flagged invoice measure must return 0 for empty/unflagged selections and 1 for a flagged invoice.'
+            }
+            $rows[0] | ConvertTo-Json | Set-Content (Join-Path $ResultsDirectory 'flagged-invoice-edges.json') -Encoding utf8
+        } elseif ($entry.Key -eq 'measures') {
             $rows[0] | ConvertTo-Json -Depth 6 | Set-Content (Join-Path $ResultsDirectory 'measures.json') -Encoding utf8
         } else { $filters[$entry.Key] = $rows }
     }
