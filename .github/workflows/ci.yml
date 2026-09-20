@@ -13,8 +13,8 @@ jobs:
     env:
       DBT_SEND_ANONYMOUS_USAGE_STATS: 'false'
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
           cache: pip
@@ -28,14 +28,14 @@ jobs:
       - run: python scripts/check_analytics.py
       - run: python scripts/build_powerbi.py
       - run: python scripts/check_repository.py
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: '22'
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: npm run test:browser
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: evidence-${{ matrix.os }}
@@ -65,8 +65,8 @@ jobs:
       PGDATABASE: aquawatch_test
       DBT_SEND_ANONYMOUS_USAGE_STATS: 'false'
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
       - run: python -m pip install -c requirements.lock -e ".[dev,analytics]"
@@ -78,8 +78,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
       - run: python scripts/check_containers.py
