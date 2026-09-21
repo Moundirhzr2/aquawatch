@@ -25,7 +25,10 @@ def available_ports():
         return app.getsockname()[1], db.getsockname()[1]
 
 
-def check(docker, config_only=False):
+def check(config_only=False):
+    # The executable is fixed; CLI input must never select a program to run.
+    # As with other developer tools, Docker must be installed on a trusted PATH.
+    docker = "docker"
     subprocess.run([docker, "compose", "version"], check=True, timeout=30)
     if not config_only:
         subprocess.run([docker, "info", "--format", "{{.OSType}}"], check=True, timeout=30)
@@ -168,11 +171,14 @@ def check(docker, config_only=False):
             run("down", "--volumes", "--remove-orphans", timeout=90)
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--docker", default="docker", help="Docker CLI executable path")
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
     parser.add_argument(
         "--config-only", action="store_true", help="Validate Compose without a daemon"
     )
-    args = parser.parse_args()
-    check(args.docker, args.config_only)
+    args = parser.parse_args(argv)
+    check(config_only=args.config_only)
+
+
+if __name__ == "__main__":
+    main()
