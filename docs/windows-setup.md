@@ -12,11 +12,18 @@ Docker Desktop 4.90.0 and WSL 2.7.13.0 were installed on the build machine. Hard
 python scripts/check_containers.py
 ```
 
-If Docker is not yet on your PATH, the verified per-user location can be passed explicitly:
+If Docker is not yet on your PATH, add its installed directory for the current
+PowerShell session. For the verified per-user installation:
 
 ```powershell
-python scripts/check_containers.py --docker "$env:LOCALAPPDATA/Programs/DockerDesktop/resources/bin/docker.exe"
+$env:PATH = "$env:LOCALAPPDATA/Programs/DockerDesktop/resources/bin;$env:PATH"
+docker --version
+python scripts/check_containers.py
 ```
+
+Use only a trusted Docker installation directory. The checker always invokes
+`docker`; it does not accept executable paths or additional commands through CLI
+arguments. The former `--docker` option has been removed.
 
 The check builds and starts a disposable Compose project. It uses distinct available ports so a running AquaWatch instance can stay open. Its database and reporting exports are temporary, and it removes its own containers and volumes when finished. The image remains in Docker's build cache. Initial image downloads require an internet connection.
 
