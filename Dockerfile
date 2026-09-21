@@ -1,5 +1,12 @@
-FROM python:3.15.0rc1-slim-bookworm AS runtime
+FROM python:3.12-slim-trixie@sha256:2f17fc044b579bab302c2e8054d3a686e2cb9a83de48e70534b94cd8ebbe06a9 AS runtime
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 DBT_SEND_ANONYMOUS_USAGE_STATS=false
+# Apply Debian security updates, including fixes absent from the published base.
+# Fail the build if the five Snyk PR #9 findings could still be present.
+RUN apt-get update \
+    && apt-get upgrade -y --no-install-recommends \
+    && dpkg --compare-versions "$(dpkg-query -W -f='${Version}' perl-base)" ge '5.40.1-6+deb13u1' \
+    && dpkg --compare-versions "$(dpkg-query -W -f='${Version}' libpcre2-8-0)" ge '10.46-1~deb13u2' \
+    && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY pyproject.toml requirements.lock ./
 COPY src ./src
