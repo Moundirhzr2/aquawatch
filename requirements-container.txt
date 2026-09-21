@@ -1,0 +1,5 @@
+# Official wheels from dbt-core-experimental-parser 2.0.0rc2's assets.json.
+# PyPI publishes only a downloader sdist. Use its exact wheels and SHA-256 hashes
+# directly so the container build does not execute the downloader backend.
+dbt-core-experimental-parser @ https://github.com/dbt-labs/dbt-core/releases/download/v2.0.0-rc.2/dbt_core_experimental_parser-2.0.0rc2-py3-none-manylinux_2_28_x86_64.whl#sha256=c9ef7683841623d4ba03f951af4771aea22db877423060933789f3eff6a092ba ; platform_machine == "x86_64"
+dbt-core-experimental-parser @ https://github.com/dbt-labs/dbt-core/releases/download/v2.0.0-rc.2/dbt_core_experimental_parser-2.0.0rc2-py3-none-manylinux_2_28_aarch64.whl#sha256=959fd3983ed01a88dc7aa604444227c4501bc8411e7f2e528a637853b57f6b1b ; platform_machine == "aarch64"

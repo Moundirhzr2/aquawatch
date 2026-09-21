@@ -34,7 +34,13 @@ visible rather than suppressed. A passing gate is not a claim of zero CVEs.
 The initial final-image scan also found six fixable pip findings inherited from
 the base image. The Docker build upgrades pip to the verified Python-3.12-compatible
 release `26.2.1` before installing the locked application dependencies.
-Downloaded dependencies must be binary wheels. Once installation completes, pip
+Downloaded dependencies must be binary wheels. The dbt experimental parser's
+PyPI release contains only a downloader source archive. `requirements-container.txt`
+references the official Linux x86_64/aarch64 wheels directly, with SHA-256 values
+from that release's `assets.json`; its version remains constrained by
+`requirements.lock`. This avoids running the downloader build backend. When
+updating the parser, update both its lock entry and these verified wheel references.
+Once installation completes, pip
 is uninstalled from the runtime image: its vendored msgpack 1.1.2 and setuptools
 70.3.0 still have published fixes, even though the application uses newer locked
 dependencies. Removing the unused installer removes those copies rather than

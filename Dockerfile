@@ -8,11 +8,11 @@ RUN apt-get update \
     && dpkg --compare-versions "$(dpkg-query -W -f='${Version}' libpcre2-8-0)" ge '10.46-1~deb13u2' \
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
-COPY pyproject.toml requirements.lock ./
+COPY pyproject.toml requirements.lock requirements-container.txt ./
 COPY src ./src
 # pip is build tooling; remove it and its vendored dependencies from runtime.
 RUN python -m pip install --no-cache-dir --only-binary :all: --upgrade pip==26.2.1 \
-    && python -m pip install --no-cache-dir --only-binary :all: -c requirements.lock '.[analytics]' \
+    && python -m pip install --no-cache-dir --only-binary :all: -c requirements.lock -r requirements-container.txt '.[analytics]' \
     && python -m pip uninstall --yes pip \
     && useradd --create-home --uid 10001 aquawatch
 COPY dbt ./dbt
