@@ -34,6 +34,12 @@ visible rather than suppressed. A passing gate is not a claim of zero CVEs.
 The initial final-image scan also found six fixable pip findings inherited from
 the base image. The Docker build upgrades pip to the verified Python-3.12-compatible
 release `26.2.1` before installing the locked application dependencies.
+Downloaded dependencies must be binary wheels. Once installation completes, pip
+is uninstalled from the runtime image: its vendored msgpack 1.1.2 and setuptools
+70.3.0 still have published fixes, even though the application uses newer locked
+dependencies. Removing the unused installer removes those copies rather than
+suppressing their findings. Container integration exercises the API and dbt
+without pip installed.
 
 Snyk's GitHub Dockerfile project analyzes the referenced base image; it may still
 report packages fixed by a later `RUN apt-get upgrade` layer. Compare that report

@@ -10,8 +10,10 @@ RUN apt-get update \
 WORKDIR /app
 COPY pyproject.toml requirements.lock ./
 COPY src ./src
+# pip is build tooling; remove it and its vendored dependencies from runtime.
 RUN python -m pip install --no-cache-dir --only-binary :all: --upgrade pip==26.2.1 \
     && python -m pip install --no-cache-dir --only-binary :all: -c requirements.lock '.[analytics]' \
+    && python -m pip uninstall --yes pip \
     && useradd --create-home --uid 10001 aquawatch
 COPY dbt ./dbt
 COPY scripts ./scripts
