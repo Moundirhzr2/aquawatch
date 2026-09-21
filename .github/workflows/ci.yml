@@ -97,7 +97,7 @@ jobs:
           exit-code: '0'
           ignore-unfixed: false
       - name: Reject fixable high or critical image vulnerabilities
-        run: trivy image --skip-db-update --scanners vuln --ignore-unfixed --severity HIGH,CRITICAL --exit-code 1 aquawatch-security:ci
+        run: trivy image --cache-dir .cache/trivy --skip-db-update --scanners vuln --ignore-unfixed --severity HIGH,CRITICAL --exit-code 1 aquawatch-security:ci
       - uses: actions/upload-artifact@v7
         if: always()
         with:
