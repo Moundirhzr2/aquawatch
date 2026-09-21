@@ -31,6 +31,10 @@ blocks fixable high/critical vulnerabilities. The `container-security-report`
 artifact includes all severities and unfixed issues, so remaining findings are
 visible rather than suppressed. A passing gate is not a claim of zero CVEs.
 
+The initial final-image scan also found six fixable pip findings inherited from
+the base image. The Docker build upgrades pip to the verified Python-3.12-compatible
+release `26.2.1` before installing the locked application dependencies.
+
 Snyk's GitHub Dockerfile project analyzes the referenced base image; it may still
 report packages fixed by a later `RUN apt-get upgrade` layer. Compare that report
 with the final-image scan and recorded package versions. Do not ignore an issue

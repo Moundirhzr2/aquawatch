@@ -10,7 +10,8 @@ RUN apt-get update \
 WORKDIR /app
 COPY pyproject.toml requirements.lock ./
 COPY src ./src
-RUN pip install --no-cache-dir -c requirements.lock '.[analytics]' \
+RUN python -m pip install --no-cache-dir --upgrade pip==26.2.1 \
+    && python -m pip install --no-cache-dir -c requirements.lock '.[analytics]' \
     && useradd --create-home --uid 10001 aquawatch
 COPY dbt ./dbt
 COPY scripts ./scripts
