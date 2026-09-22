@@ -83,3 +83,23 @@ jobs:
         with:
           python-version: '3.12'
       - run: python scripts/check_containers.py
+      - name: Build the image for security verification
+        run: docker build --pull --tag aquawatch-security:ci .
+      - name: Record installed security-sensitive package versions
+        run: docker run --rm aquawatch-security:ci dpkg-query -W perl-base libpcre2-8-0 libsqlite3-0 gzip
+      - name: Scan the final image, including unfixed vulnerabilities
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: aquawatch-security:ci
+          scanners: vuln
+          format: json
+          output: container-vulnerabilities.json
+          exit-code: '0'
+          ignore-unfixed: false
+      - name: Reject fixable high or critical image vulnerabilities
+        run: trivy image --cache-dir .cache/trivy --skip-db-update --scanners vuln --ignore-unfixed --severity HIGH,CRITICAL --exit-code 1 aquawatch-security:ci
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: container-security-report
+          path: container-vulnerabilities.json
