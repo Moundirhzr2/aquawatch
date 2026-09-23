@@ -23,7 +23,7 @@ aquawatch = "aquawatch.cli:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-aquawatch = ["static/*"]
+aquawatch = ["static/*", "static/icons/*.svg", "static/icons/LICENSE"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
