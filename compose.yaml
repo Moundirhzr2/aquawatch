@@ -17,6 +17,8 @@ services:
     restart: unless-stopped
   app:
     build: .
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
     environment:
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-aquawatch}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-aquawatch}
       ALLOWED_HOSTS: localhost,127.0.0.1
@@ -29,6 +31,8 @@ services:
   analytics:
     build: .
     profiles: [analytics]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
     environment:
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-aquawatch}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-aquawatch}
       PGHOST: db

@@ -64,6 +64,8 @@ let server;
   await page.getByRole('link', {name:'Data pipeline',exact:false}).click();
   await page.locator('#view-pipeline .import-demo').click();
   await page.waitForFunction(() => document.querySelector('#toast')?.textContent.includes('imported'));
+  assert.equal(await page.locator('#view-pipeline .import-demo .icon').textContent(), '', 'Import leaves the icon untouched');
+  assert.equal(await page.locator('#view-pipeline .import-label').textContent(), 'Run daily import');
   await page.locator('#view-pipeline .import-demo').click();
   await page.getByText('Already imported. Replay verified: no new readings or duplicate cases.').waitFor();
   await page.getByRole('button',{name:'synthetic-baseline.csv',exact:true}).click();
