@@ -1,5 +1,7 @@
 # Validation record
 
+Invoice-volume reconciliation update on 2026-09-23: 35 Python tests passed; a fresh isolated browser run passed desktop/mobile navigation and the new invoice table/case link with no JavaScript errors. DuckDB `dbt build` passed 48 nodes (7 seeds, 8 models, 33 data tests), including the new volume contract. Python/SQL parity passed for every one of 120 invoices, and repository checks passed the generated four-page PBIP source (35 visual definitions). The fourth Power BI page is not yet natively refreshed or visually verified in Desktop; the historical evidence below applies to the earlier three-page version.
+
 Project checklist updated on 2026-09-18: source published on GitHub, main branch protected, and a fresh remote Docker integration run passed. See the [publication verification record](release-2026-09-18.md) and [container evidence](container-validation.json). Earlier local engine failures remain historical records.
 
 Power BI finishing change on 2026-09-18: `Flagged invoices` now wraps the filtered count in `COALESCE(..., 0)` so an empty selection returns zero. Updated the source model, generator and all three local report copies. A fresh native model check passed all 14 measures and explicitly verified empty/unflagged/flagged selections as 0/0/1. Desktop rendering of this change has not been rechecked.

@@ -3,7 +3,8 @@
   "pageOrder": [
     "network",
     "quality",
-    "billing"
+    "billing",
+    "volume"
   ],
   "activePageName": "network"
 }

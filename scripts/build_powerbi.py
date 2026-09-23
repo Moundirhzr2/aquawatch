@@ -51,6 +51,9 @@ def projection(table, prop, measure=False):
         "file_name": "File",
         "rejected": "Quarantined",
         "billed_volume_liters": "Volume (L)",
+        "measured_volume_liters": "Meter volume (L)",
+        "signed_volume_difference_liters": "Volume difference (L)",
+        "volume_status": "Volume check",
         "billed_amount_cents": "Billed (cents)",
         "expected_amount_cents": "Expected (cents)",
         "signed_difference_cents": "Difference (cents)",
@@ -271,6 +274,13 @@ def build(data_dir):
         "interval_days",
         "consumption_liters",
         "billed_volume_liters",
+        "start_counter_liters",
+        "end_counter_liters",
+        "measured_volume_liters",
+        "signed_volume_difference_liters",
+        "volume_review_liters",
+        "missing_days",
+        "reset_events",
         "billed_amount_cents",
         "expected_amount_cents",
         "signed_difference_cents",
@@ -335,6 +345,26 @@ def build(data_dir):
                 "Flagged invoices",
                 "COALESCE(CALCULATE(COUNTROWS(fct_billing), fct_billing[review_amount_cents] > 0), 0)",
                 "#,0",
+            ),
+            (
+                "Comparable invoices",
+                'COALESCE(CALCULATE(COUNTROWS(fct_billing), fct_billing[volume_status] IN {"matched", "mismatch"}), 0)',
+                "#,0",
+            ),
+            (
+                "Volume mismatches",
+                'COALESCE(CALCULATE(COUNTROWS(fct_billing), fct_billing[volume_status] = "mismatch"), 0)',
+                "#,0",
+            ),
+            (
+                "Unverified invoices",
+                'COALESCE(CALCULATE(COUNTROWS(fct_billing), fct_billing[volume_status] IN {"missing_boundary", "incomplete", "counter_reset", "invalid_period"}), 0)',
+                "#,0",
+            ),
+            (
+                "Volume to review m3",
+                "DIVIDE(SUM(fct_billing[volume_review_liters]), 1000)",
+                "#,0.0",
             ),
         ],
         "fct_imports": [
@@ -481,6 +511,7 @@ def build(data_dir):
         ("network", "01 · Network overview"),
         ("quality", "02 · Data quality"),
         ("billing", "03 · Billing review"),
+        ("volume", "04 · Volume reconciliation"),
     ]
     write(
         PBI / "AquaWatch.Report/definition/pages/pages.json",
@@ -683,12 +714,71 @@ def build(data_dir):
     text_visual(
         "billing",
         "scope",
-        "Scope: stated invoice volume × synthetic tariff + fixed fee. Meter-to-invoice volume reconciliation is out of scope.",
+        "Scope: stated invoice volume × synthetic tariff + fixed fee. See Volume reconciliation for the separate meter comparison.",
         y=670,
         size=12,
         height=80,
     )
-    print("Built Power BI project: 7 tables, 14 measures, 7 relationships and 3 report pages.")
+    for i, measure in enumerate(
+        ["Comparable invoices", "Volume mismatches", "Unverified invoices", "Volume to review m3"]
+    ):
+        visual(
+            "volume",
+            f"kpi{i}",
+            "cardVisual",
+            28 + i * 312,
+            122,
+            290,
+            125,
+            {"Data": [projection("fct_billing", measure, True)]},
+            measure,
+        )
+    visual(
+        "volume",
+        "district",
+        "clusteredBarChart",
+        28,
+        270,
+        430,
+        270,
+        {
+            "Category": [projection("dim_meters", "district")],
+            "Y": [projection("fct_billing", "Volume to review m3", True)],
+        },
+        "Volume differences by district · m³",
+    )
+    visual(
+        "volume",
+        "invoices",
+        "tableEx",
+        480,
+        270,
+        772,
+        360,
+        {
+            "Values": [
+                projection("fct_billing", c)
+                for c in [
+                    "invoice_id",
+                    "meter_id",
+                    "billed_volume_liters",
+                    "measured_volume_liters",
+                    "signed_volume_difference_liters",
+                    "volume_status",
+                ]
+            ]
+        },
+        "Invoice-to-meter comparison · liters",
+    )
+    text_visual(
+        "volume",
+        "scope",
+        "Only complete periods with both boundary readings and no reset are compared. A gap or reset is unverified, not a volume error. More than 1 m³ difference prompts review; no overcharge is confirmed.",
+        y=670,
+        size=12,
+        height=80,
+    )
+    print("Built Power BI project: 7 tables, 18 measures, 7 relationships and 4 report pages.")
 
 
 if __name__ == "__main__":

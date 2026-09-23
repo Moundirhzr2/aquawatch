@@ -12,6 +12,7 @@ from sqlalchemy import select, update
 
 from . import db
 from .detection import case, detect
+from .synthetic import DEMO_VOLUME_ERRORS, invoice_amount
 
 MAX_BYTES = 5 * 1024 * 1024
 MAX_ROWS = 100_000
@@ -194,6 +195,56 @@ def bootstrap(engine, fixture):
     db.metadata.create_all(engine)
     with engine.begin() as conn:
         if conn.execute(select(db.customers.c.id).limit(1)).first():
+            # Upgrade only the exact older synthetic invoices. A modified or
+            # non-demo invoice never gets overwritten by this fixture update.
+            fixture_invoices = {r["meter_id"]: r for r in fixture["invoices"]}
+            tariffs = {r["id"]: r for r in fixture["tariffs"]}
+            changed = False
+            for number, delta in DEMO_VOLUME_ERRORS.items():
+                mid = f"M-{number:04d}"
+                target = fixture_invoices.get(mid)
+                if target is None:
+                    continue
+                current = (
+                    conn.execute(select(db.invoices).where(db.invoices.c.id == target["id"]))
+                    .mappings()
+                    .first()
+                )
+                tariff = tariffs[target["tariff_id"]]
+                old_volume = target["billed_volume_liters"] - delta
+                old_amount = invoice_amount(
+                    old_volume, tariff["rate_cents_per_m3"], tariff["fixed_fee_cents"]
+                )
+                if (
+                    current
+                    and all(
+                        current[key] == target[key]
+                        for key in ["meter_id", "tariff_id", "period_start", "period_end"]
+                    )
+                    and (current["billed_volume_liters"], current["billed_amount_cents"])
+                    == (old_volume, old_amount)
+                ):
+                    conn.execute(
+                        update(db.invoices)
+                        .where(db.invoices.c.id == target["id"])
+                        .values(
+                            billed_volume_liters=target["billed_volume_liters"],
+                            billed_amount_cents=target["billed_amount_cents"],
+                        )
+                    )
+                    changed = True
+            if changed:
+                readings = records(conn, db.readings)
+                if readings:
+                    save_cases(
+                        conn,
+                        detect(
+                            readings,
+                            records(conn, db.invoices),
+                            records(conn, db.tariffs),
+                            max(row["reading_date"] for row in readings),
+                        ),
+                    )
             return
         for name in ["customers", "meters", "tariffs", "invoices"]:
             conn.execute(getattr(db, name).insert(), fixture[name])

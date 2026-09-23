@@ -9,6 +9,7 @@ Use a fresh demo if you want the exact baseline numbers. The database is persist
 **0:20–0:40 — Show the network overview.**
 
 Point to the meters, accepted readings, active cases and acceptance rate. Explain that a high acceptance rate does not mean every meter supplied every reading. State that invoice discrepancies are review amounts, not savings.
+If time permits, open invoice INV-0029 in the volume table: its tariff arithmetic is correct, but its stated volume is 12 m³ above the complete meter-period change.
 
 **0:40–1:10 — Investigate M-0001.**
 
@@ -20,10 +21,10 @@ Run the daily import, then run it again. The first accepts 120 new observations;
 
 **1:30–1:50 — Show evidence and limits.**
 
-Open Model & evidence. Explain the 25 matched events and four misses. Discuss why subtle consumption changes are hard to distinguish from legitimate activity without additional context.
+Open Model & evidence. Explain the 27 matched events and four misses. Discuss why subtle consumption changes are hard to distinguish from legitimate activity without additional context.
 
 **1:50–2:00 — Show the engineering.**
 
-Open the repository architecture, tests and dbt model graph. If Power BI has been locally refreshed, show its three report pages. Be clear about which features you can demonstrate versus those still needing native verification.
+Open the repository architecture, tests and dbt model graph. If Power BI has been locally refreshed, show its four report pages, including the separate volume comparison. Be clear about which features you can demonstrate versus those still needing native verification.
 
 For a longer interview, walk through `pipeline.py`, `fct_consumption.sql`, a concurrency test and a Power BI measure. Explain the implementation in your own words, including the role of AI assistance.

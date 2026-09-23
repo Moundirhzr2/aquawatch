@@ -19,6 +19,8 @@ d7cbe35c16493baf,M-0015,billing_mismatch,2026-08-29,high,open,4000,1,Invoice doe
 4e9480c130cb069d,M-0018,billing_mismatch,2026-08-29,high,open,4300,1,Invoice does not match tariff
 1b7c3f3763e9e719,M-0019,billing_mismatch,2026-08-29,high,open,4400,1,Invoice does not match tariff
 dd80c6c5adbb4225,M-0020,billing_mismatch,2026-08-29,high,open,4500,1,Invoice does not match tariff
+d28d25d01d92fcac,M-0029,volume_mismatch,2026-08-29,high,open,0,1,Invoice volume differs from meter readings
+88ce096e08c1b57a,M-0030,volume_mismatch,2026-08-29,high,open,0,1,Invoice volume differs from meter readings
 13e6872cfc66d8d0,M-0031,duplicate_reading,2026-08-29,medium,open,0,1,Duplicate or conflicting reading
 03da6b78d1e6dbdb,M-0032,duplicate_reading,2026-08-29,medium,open,0,1,Duplicate or conflicting reading
 76118a1f396e92ee,M-0033,duplicate_reading,2026-08-29,medium,open,0,1,Duplicate or conflicting reading

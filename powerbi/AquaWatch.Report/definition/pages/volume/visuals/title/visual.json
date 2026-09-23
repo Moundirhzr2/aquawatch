@@ -1,13 +1,13 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.4.0/schema.json",
-  "name": "scope",
+  "name": "title",
   "position": {
     "x": 28,
-    "y": 670,
-    "z": 670,
+    "y": 20,
+    "z": 20,
     "width": 1220,
-    "height": 80,
-    "tabOrder": 670
+    "height": 55,
+    "tabOrder": 20
   },
   "visual": {
     "visualType": "textbox",
@@ -19,10 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "Scope: stated invoice volume × synthetic tariff + fixed fee. See Volume reconciliation for the separate meter comparison.",
+                    "value": "AquaWatch  /  Volume reconciliation",
                     "textStyle": {
                       "fontFamily": "Segoe UI",
-                      "fontSize": "12pt",
+                      "fontSize": "26pt",
                       "color": "#172D35"
                     }
                   }

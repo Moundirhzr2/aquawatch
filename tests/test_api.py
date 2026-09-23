@@ -20,7 +20,7 @@ def test_dashboard_and_static_assets(client):
     data = client.get("/api/overview").json()
     assert data["meters"] == 120
     assert data["readings"] == 10796
-    assert data["active_cases"] == 25
+    assert data["active_cases"] == 27
     assert data["review_amount_cents"] == 25500
     assert len(data["daily"]) == 90
 
@@ -30,6 +30,22 @@ def test_filter_and_search(client):
     assert len(rows) == 6
     assert len(client.get("/api/cases?q=M-0001").json()) == 1
     assert client.get("/api/cases?q=does-not-exist").json() == []
+
+
+def test_invoice_volume_review_is_explainable_and_conservative(client):
+    rows = client.get("/api/billing/reconciliation").json()
+    assert len(rows) == 120
+    assert {
+        status: sum(r["status"] == status for r in rows)
+        for status in {"matched", "mismatch", "incomplete", "counter_reset"}
+    } == {"matched": 110, "mismatch": 2, "incomplete": 4, "counter_reset": 4}
+    mismatch = next(r for r in rows if r["meter_id"] == "M-0029")
+    assert mismatch["signed_volume_difference_liters"] == 12000
+    assert mismatch["case_id"]
+    detail = client.get(f"/api/cases/{mismatch['case_id']}").json()
+    assert detail["kind"] == "volume_mismatch"
+    assert detail["amount_cents"] == 0
+    assert next(r for r in rows if r["meter_id"] == "M-0007")["measured_volume_liters"] is None
 
 
 def test_state_history_replay_and_conflict(client):
@@ -135,6 +151,6 @@ def test_upload_failure_ledger_and_replay(client):
 def test_csv_export_and_benchmark(client):
     response = client.get("/api/export/cases.csv")
     assert response.status_code == 200 and "attachment" in response.headers["Content-Disposition"]
-    assert len(response.text.splitlines()) == 26
+    assert len(response.text.splitlines()) == 28
     result = client.get("/api/evaluation").json()
-    assert result["false_negatives"] == 4 and result["true_positives"] == 25
+    assert result["false_negatives"] == 4 and result["true_positives"] == 27

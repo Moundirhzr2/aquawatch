@@ -12,6 +12,10 @@
 | Valid interval share | Valid daily intervals / all accepted observations | Includes first observations in denominator; distinct from acceptance rate |
 | Invoice amount to review | Sum of absolute invoice differences exceeding one cent | Independent of case status; includes resolved-case invoices |
 | Expected invoice amount | Half-up rounding of stated liters × cents-per-m³ / 1,000, plus fixed fee | Uses stated invoice volume, not a reconstructed meter volume |
+| Comparable invoices | Invoice periods with exact start/end readings, no missing daily reading and no counter decrease | Conservative; gaps may still contain the total but can hide a replacement |
+| Invoice volume difference | Stated billed liters minus end/start counter difference; over 1,000 L in absolute value opens a case | Positive means billed volume is greater; neither sign proves an overcharge |
+| Unverified invoices | Periods lacking a boundary, containing a daily gap or reset, or having invalid dates | Excluded from mismatch counts and volume-to-review totals |
+| Volume to review | Sum of absolute volume differences above the 1,000 L tolerance, divided by 1,000 for m³ | Not a financial amount or confirmed loss |
 | Synthetic precision | Exact matched events / predicted events | Benchmark only; no true-negative accuracy |
 | Synthetic recall | Exact matched events / labeled events | Labels include four subtle events deliberately below threshold |
 

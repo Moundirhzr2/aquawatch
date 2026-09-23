@@ -7,9 +7,10 @@ from collections import defaultdict
 from datetime import date, timedelta
 from statistics import median
 
+from .reconciliation import reconcile_invoice
 from .synthetic import invoice_amount
 
-RULE_VERSION = "1.0.0"
+RULE_VERSION = "1.1.0"
 
 
 def case(meter_id, kind, event_date, severity, title, explanation, evidence, amount_cents=0):
@@ -170,6 +171,25 @@ def detect(readings, invoices, tariffs, as_of: str):
                         signed_difference_cents=discrepancy,
                     ),
                     abs(discrepancy),
+                )
+            )
+        comparison = reconcile_invoice(invoice, grouped[invoice["meter_id"]])
+        if comparison["status"] == "mismatch":
+            output.append(
+                case(
+                    invoice["meter_id"],
+                    "volume_mismatch",
+                    invoice["period_end"],
+                    "high",
+                    "Invoice volume differs from meter readings",
+                    "The invoice's stated volume differs by more than 1 m³ from the change between complete, non-reset meter readings for this billing period. Check the invoice and meter history; this is not a confirmed overcharge.",
+                    dict(
+                        invoice_id=invoice["id"],
+                        period_start=invoice["period_start"],
+                        period_end=invoice["period_end"],
+                        billed_volume_liters=invoice["billed_volume_liters"],
+                        **comparison,
+                    ),
                 )
             )
     return output

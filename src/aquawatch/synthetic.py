@@ -9,6 +9,7 @@ from datetime import date, timedelta
 
 START = date(2026, 6, 1)
 AS_OF = START + timedelta(days=89)
+DEMO_VOLUME_ERRORS = {29: 12_000, 30: -8_000}
 
 
 def invoice_amount(volume_liters: int, rate_cents: int, fee_cents: int) -> int:
@@ -62,7 +63,12 @@ def generate(seed: int = 42, count: int = 120) -> dict:
             readings.append(dict(meter_id=mid, reading_date=d, counter_liters=counter))
             if (1 <= n <= 6 or 25 <= n <= 28) and day == 81:
                 labels.append(dict(meter_id=mid, kind="sustained_usage", event_date=d))
-        amount = invoice_amount(volume, 325, 850)
+        # Separate volume errors from tariff arithmetic errors: these invoices
+        # have a mathematically correct total for the wrong stated volume.
+        billed_volume = volume + DEMO_VOLUME_ERRORS.get(n, 0)
+        if n in DEMO_VOLUME_ERRORS:
+            labels.append(dict(meter_id=mid, kind="volume_mismatch", event_date=AS_OF.isoformat()))
+        amount = invoice_amount(billed_volume, 325, 850)
         if 15 <= n <= 20:
             amount += 2500 + n * 100
             labels.append(dict(meter_id=mid, kind="billing_mismatch", event_date=AS_OF.isoformat()))
@@ -73,7 +79,7 @@ def generate(seed: int = 42, count: int = 120) -> dict:
                 tariff_id="T-2026",
                 period_start=START.isoformat(),
                 period_end=AS_OF.isoformat(),
-                billed_volume_liters=volume,
+                billed_volume_liters=billed_volume,
                 billed_amount_cents=amount,
             )
         )
