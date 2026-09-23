@@ -10,6 +10,8 @@ A data engineering and analytics portfolio project by **Moundir Houazar**, inspi
 
 ![AquaWatch dashboard](docs/images/dashboard.png)
 
+The dashboard visual direction adapts the [MotionSites Forecast Center prompt](https://motionsites.ai/?prompt=forecast-center) to water-network operations. It uses an atmospheric utility header and restrained glass surfaces while keeping the charts and decisions tied to AquaWatch's actual synthetic data. Choose a 7, 30 or 90 day window, inspect a reading by pointer or keyboard, or select an exception type to open the filtered investigation queue. Animations respect reduced-motion preferences.
+
 ## See the complete workflow
 
 1. Import a daily readings file.
