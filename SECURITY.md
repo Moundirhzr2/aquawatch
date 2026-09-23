@@ -5,6 +5,7 @@ AquaWatch is a **local, single-operator synthetic-data demonstration**. Do not e
 Implemented controls:
 
 - Loopback binding by default; Compose publishes ports only on `127.0.0.1`.
+- The app and analytics containers drop Linux capabilities and disallow privilege escalation.
 - Trusted host allowlist, no permissive cross-origin policy, per-process write token.
 - Database-backed state, parameterized SQLAlchemy expressions, allowlisted reporting table identifiers.
 - HTML escaping of dynamic UI content and CSV formula-prefix handling on case export.
@@ -25,3 +26,5 @@ Limitations:
 Before production: authenticated users/roles, TLS, private networking, per-source job locks, recoverable jobs, migrations, backups, retention/redaction, request-rate limits, database least-privilege roles, dependency scanning and independent domain validation.
 
 If reporting an issue, use synthetic reproduction data and never include credentials or real customer records in a public issue.
+
+The latest point-in-time results and unresolved base-image findings are recorded in the [23 September 2026 security review](docs/security-audit-2026-09-23.md).

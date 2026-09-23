@@ -128,9 +128,9 @@ async function navigate() {
   try {if(view==="investigations")await loadQueue();else if(view==="pipeline")await loadRuns();else if(view==="methodology")await loadEvaluation();} catch(error){toast(error.message,true);}
 }
 async function dailyImport() {
-  const buttons=$$(".import-demo");buttons.forEach(b=>{b.disabled=true;$("span",b).textContent="Importing…";});
+  const buttons=$$(".import-demo");buttons.forEach(b=>{b.disabled=true;$(".import-label",b).textContent="Importing…";});
   try {const result=await api("/api/import/demo",{method:"POST"});await Promise.all([loadOverview(),loadQueue(),loadRuns()]);toast(result.replayed?"Already imported. Replay verified: no new readings or duplicate cases.":`${number(result.accepted)} readings imported · ${result.rejected} quarantined · ${result.cases_added} new cases.`);}
-  catch(error){toast(error.message,true);}finally{buttons.forEach(b=>{b.disabled=false;$("span",b).textContent="Run daily import";});}
+  catch(error){toast(error.message,true);}finally{buttons.forEach(b=>{b.disabled=false;$(".import-label",b).textContent="Run daily import";});}
 }
 async function initialize() {
   try {
