@@ -37,7 +37,7 @@ models:
               arguments:
                 values: [valid, initial, gap, counter_reset]
   - name: fct_billing
-    description: "One invoice; tariff arithmetic only. Review amounts are neither recovered revenue nor confirmed savings."
+    description: "One invoice; tariff arithmetic and conservative billed-volume versus complete meter-period comparison. Review amounts are neither recovered revenue nor confirmed savings."
     columns:
       - name: invoice_id
         data_tests: [unique, not_null]
@@ -47,6 +47,12 @@ models:
               arguments:
                 to: ref('dim_meters')
                 field: meter_id
+      - name: volume_status
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [matched, mismatch, missing_boundary, incomplete, counter_reset, invalid_period]
   - name: fct_cases
     description: "One stable investigation event per meter/type/start date; operational human status is preserved."
     columns:

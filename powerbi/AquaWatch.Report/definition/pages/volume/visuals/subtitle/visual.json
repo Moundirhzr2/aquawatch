@@ -1,13 +1,13 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.4.0/schema.json",
-  "name": "scope",
+  "name": "subtitle",
   "position": {
     "x": 28,
-    "y": 670,
-    "z": 670,
+    "y": 72,
+    "z": 72,
     "width": 1220,
-    "height": 80,
-    "tabOrder": 670
+    "height": 32,
+    "tabOrder": 72
   },
   "visual": {
     "visualType": "textbox",
@@ -19,10 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "Scope: stated invoice volume × synthetic tariff + fixed fee. See Volume reconciliation for the separate meter comparison.",
+                    "value": "Synthetic utility data · Moundir Houazar · Amounts requiring review are not confirmed savings",
                     "textStyle": {
                       "fontFamily": "Segoe UI",
-                      "fontSize": "12pt",
+                      "fontSize": "11pt",
                       "color": "#172D35"
                     }
                   }

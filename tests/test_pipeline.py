@@ -2,12 +2,13 @@ import csv
 import io
 
 import pytest
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 
 from aquawatch import db
 from aquawatch.detection import detect, series
 from aquawatch.evaluation import evaluate
-from aquawatch.pipeline import ingest, records
+from aquawatch.pipeline import bootstrap, ingest, records
+from aquawatch.reconciliation import reconcile_invoice
 from aquawatch.synthetic import AS_OF, csv_bytes, generate, invoice_amount
 
 
@@ -103,6 +104,32 @@ def test_reset_and_gap_do_not_create_fake_daily_volume():
     assert [r["consumption_liters"] for r in series(raw)] == [None, None, None, 200]
 
 
+def test_invoice_volume_comparison_requires_complete_period():
+    invoice = dict(period_start="2026-08-01", period_end="2026-08-03", billed_volume_liters=3000)
+    rows = [
+        dict(reading_date="2026-08-01", counter_liters=5000),
+        dict(reading_date="2026-08-02", counter_liters=6000),
+        dict(reading_date="2026-08-03", counter_liters=7000),
+        dict(reading_date="2026-08-04", counter_liters=100),
+    ]
+    result = reconcile_invoice(invoice, rows)
+    assert result["status"] == "matched" and result["signed_volume_difference_liters"] == 1000
+    assert (
+        reconcile_invoice({**invoice, "billed_volume_liters": 3001}, rows)["status"] == "mismatch"
+    )
+    assert reconcile_invoice(invoice, rows[1:])["status"] == "missing_boundary"
+    gap = reconcile_invoice(invoice, [rows[0], rows[2]])
+    assert gap["status"] == "incomplete" and gap["missing_days"] == 1
+    reset = reconcile_invoice(invoice, [rows[0], {**rows[1], "counter_liters": 100}, rows[2]])
+    assert reset["status"] == "counter_reset" and reset["measured_volume_liters"] is None
+    hidden_gap_reset = reconcile_invoice(invoice, [rows[0], {**rows[2], "counter_liters": 100}])
+    assert hidden_gap_reset["status"] == "counter_reset"
+    assert (hidden_gap_reset["missing_days"], hidden_gap_reset["reset_events"]) == (1, 1)
+    assert (
+        reconcile_invoice({**invoice, "period_end": "invalid"}, rows)["status"] == "invalid_period"
+    )
+
+
 def test_detection_does_not_see_future_or_labels():
     rows = [
         r
@@ -122,10 +149,11 @@ def test_benchmark_has_known_misses_and_no_false_alerts(engine, seed):
     ingest(engine, fixture["csv"], "baseline.csv", AS_OF.isoformat())
     with engine.connect() as conn:
         result = evaluate(records(conn, db.cases), fixture["labels"])
-    assert result["true_positives"] == 25
+    assert result["true_positives"] == 27
     assert result["false_positives"] == 0
     assert result["false_negatives"] == 4
     assert result["by_kind"]["sustained_usage"]["fn"] == 4
+    assert result["by_kind"]["volume_mismatch"]["tp"] == 2
 
 
 def test_daily_increment_does_not_duplicate_existing_events(seeded):
@@ -135,3 +163,40 @@ def test_daily_increment_does_not_duplicate_existing_events(seeded):
     result = ingest(engine, fixture["daily_csv"], "daily.csv", "2026-08-30")
     assert result["accepted"] == 120
     assert count(engine, db.cases) == before
+
+
+def test_older_demo_invoices_upgrade_without_losing_decisions(engine):
+    current = generate()
+    older = generate()
+    for row in older["invoices"]:
+        if row["meter_id"] in {"M-0029", "M-0030"}:
+            delta = 12_000 if row["meter_id"] == "M-0029" else -8_000
+            row["billed_volume_liters"] -= delta
+            row["billed_amount_cents"] = invoice_amount(row["billed_volume_liters"], 325, 850)
+    bootstrap(engine, older)
+    ingest(engine, older["csv"], "older-demo.csv", AS_OF.isoformat())
+    assert count(engine, db.cases) == 25
+    with engine.begin() as conn:
+        selected = conn.execute(select(db.cases.c.id).limit(1)).scalar_one()
+        conn.execute(
+            update(db.cases)
+            .where(db.cases.c.id == selected)
+            .values(status="investigating", version=2)
+        )
+    bootstrap(engine, current)
+    bootstrap(engine, current)
+    assert count(engine, db.cases) == 27
+    with engine.connect() as conn:
+        assert (
+            conn.execute(select(db.cases.c.status).where(db.cases.c.id == selected)).scalar_one()
+            == "investigating"
+        )
+        assert {
+            r["meter_id"]: r["billed_volume_liters"]
+            for r in records(conn, db.invoices)
+            if r["meter_id"] in {"M-0029", "M-0030"}
+        } == {
+            r["meter_id"]: r["billed_volume_liters"]
+            for r in current["invoices"]
+            if r["meter_id"] in {"M-0029", "M-0030"}
+        }

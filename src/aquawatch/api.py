@@ -24,6 +24,7 @@ from . import db
 from .detection import series
 from .evaluation import evaluate
 from .pipeline import MAX_BYTES, bootstrap, ingest, now, records
+from .reconciliation import reconcile_invoice
 from .synthetic import AS_OF, generate
 
 STATIC = Path(__file__).parent / "static"
@@ -202,6 +203,35 @@ def create_app(engine=None, auto_seed=True):
                 ).mappings()
             )
         return {**item, "readings": series(timeline), "history": [dict(r) for r in events]}
+
+    @app.get("/api/billing/reconciliation")
+    def billing_reconciliation():
+        with engine.connect() as conn:
+            invoices = records(conn, db.invoices)
+            readings = records(conn, db.readings)
+            meters = {r["id"]: r for r in records(conn, db.meters)}
+            customers = {r["id"]: r for r in records(conn, db.customers)}
+            cases = {
+                (r["meter_id"], r["event_date"]): r["id"]
+                for r in records(conn, db.cases)
+                if r["kind"] == "volume_mismatch"
+            }
+        by_meter = {}
+        for row in readings:
+            by_meter.setdefault(row["meter_id"], []).append(row)
+        return [
+            {
+                "invoice_id": invoice["id"],
+                "meter_id": invoice["meter_id"],
+                "district": customers[meters[invoice["meter_id"]]["customer_id"]]["district"],
+                "period_start": invoice["period_start"],
+                "period_end": invoice["period_end"],
+                "billed_volume_liters": invoice["billed_volume_liters"],
+                "case_id": cases.get((invoice["meter_id"], invoice["period_end"])),
+                **reconcile_invoice(invoice, by_meter.get(invoice["meter_id"], [])),
+            }
+            for invoice in invoices
+        ]
 
     @app.patch("/api/cases/{case_id}")
     def change_case(case_id: str, payload: CaseUpdate):

@@ -273,6 +273,42 @@
             "summarizeBy": "none"
           },
           {
+            "name": "start_counter_liters",
+            "dataType": "int64",
+            "sourceColumn": "start_counter_liters",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "end_counter_liters",
+            "dataType": "int64",
+            "sourceColumn": "end_counter_liters",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "missing_days",
+            "dataType": "int64",
+            "sourceColumn": "missing_days",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "reset_events",
+            "dataType": "int64",
+            "sourceColumn": "reset_events",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "volume_status",
+            "dataType": "string",
+            "sourceColumn": "volume_status",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "measured_volume_liters",
+            "dataType": "int64",
+            "sourceColumn": "measured_volume_liters",
+            "summarizeBy": "none"
+          },
+          {
             "name": "signed_difference_cents",
             "dataType": "int64",
             "sourceColumn": "signed_difference_cents",
@@ -282,6 +318,18 @@
             "name": "review_amount_cents",
             "dataType": "int64",
             "sourceColumn": "review_amount_cents",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "signed_volume_difference_liters",
+            "dataType": "int64",
+            "sourceColumn": "signed_volume_difference_liters",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "volume_review_liters",
+            "dataType": "int64",
+            "sourceColumn": "volume_review_liters",
             "summarizeBy": "none"
           }
         ],
@@ -293,10 +341,10 @@
               "type": "m",
               "expression": [
                 "let",
-                "  Source = Csv.Document(File.Contents(DataFolder & \"/fct_billing.csv\"), [Delimiter=\",\", Columns=10, Encoding=65001, QuoteStyle=QuoteStyle.Csv]),",
+                "  Source = Csv.Document(File.Contents(DataFolder & \"/fct_billing.csv\"), [Delimiter=\",\", Columns=18, Encoding=65001, QuoteStyle=QuoteStyle.Csv]),",
                 "  Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),",
                 "  EmptyToNull = Table.ReplaceValue(Headers, \"\", null, Replacer.ReplaceValue, Table.ColumnNames(Headers)),",
-                "  Typed = Table.TransformColumnTypes(EmptyToNull, {{\"invoice_id\", type text}, {\"meter_id\", type text}, {\"tariff_id\", type text}, {\"period_start\", type date}, {\"period_end\", type date}, {\"billed_volume_liters\", Int64.Type}, {\"billed_amount_cents\", Int64.Type}, {\"expected_amount_cents\", Int64.Type}, {\"signed_difference_cents\", Int64.Type}, {\"review_amount_cents\", Int64.Type}}, \"en-US\")",
+                "  Typed = Table.TransformColumnTypes(EmptyToNull, {{\"invoice_id\", type text}, {\"meter_id\", type text}, {\"tariff_id\", type text}, {\"period_start\", type date}, {\"period_end\", type date}, {\"billed_volume_liters\", Int64.Type}, {\"billed_amount_cents\", Int64.Type}, {\"expected_amount_cents\", Int64.Type}, {\"start_counter_liters\", Int64.Type}, {\"end_counter_liters\", Int64.Type}, {\"missing_days\", Int64.Type}, {\"reset_events\", Int64.Type}, {\"volume_status\", type text}, {\"measured_volume_liters\", Int64.Type}, {\"signed_difference_cents\", Int64.Type}, {\"review_amount_cents\", Int64.Type}, {\"signed_volume_difference_liters\", Int64.Type}, {\"volume_review_liters\", Int64.Type}}, \"en-US\")",
                 "in",
                 "  Typed"
               ]
@@ -326,6 +374,30 @@
             "name": "Flagged invoices",
             "expression": "COALESCE(CALCULATE(COUNTROWS(fct_billing), fct_billing[review_amount_cents] > 0), 0)",
             "formatString": "#,0",
+            "description": "Synthetic demonstration; see docs/metric-definitions.md for grain and limitations."
+          },
+          {
+            "name": "Comparable invoices",
+            "expression": "COALESCE(CALCULATE(COUNTROWS(fct_billing), fct_billing[volume_status] IN {\"matched\", \"mismatch\"}), 0)",
+            "formatString": "#,0",
+            "description": "Synthetic demonstration; see docs/metric-definitions.md for grain and limitations."
+          },
+          {
+            "name": "Volume mismatches",
+            "expression": "COALESCE(CALCULATE(COUNTROWS(fct_billing), fct_billing[volume_status] = \"mismatch\"), 0)",
+            "formatString": "#,0",
+            "description": "Synthetic demonstration; see docs/metric-definitions.md for grain and limitations."
+          },
+          {
+            "name": "Unverified invoices",
+            "expression": "COALESCE(CALCULATE(COUNTROWS(fct_billing), fct_billing[volume_status] IN {\"missing_boundary\", \"incomplete\", \"counter_reset\", \"invalid_period\"}), 0)",
+            "formatString": "#,0",
+            "description": "Synthetic demonstration; see docs/metric-definitions.md for grain and limitations."
+          },
+          {
+            "name": "Volume to review m3",
+            "expression": "DIVIDE(SUM(fct_billing[volume_review_liters]), 1000)",
+            "formatString": "#,0.0",
             "description": "Synthetic demonstration; see docs/metric-definitions.md for grain and limitations."
           }
         ]

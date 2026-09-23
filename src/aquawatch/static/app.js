@@ -4,10 +4,11 @@ const $$ = (selector, scope = document) => [...scope.querySelectorAll(selector)]
 const esc = value => String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const number = value => new Intl.NumberFormat("en-GB").format(value);
 const euro = cents => new Intl.NumberFormat("en-GB", {style:"currency",currency:"EUR",maximumFractionDigits:2}).format(cents/100);
-const names = {sustained_usage:"Sustained consumption",meter_reset:"Counter reset",missing_reading:"Missing reading",billing_mismatch:"Billing mismatch",duplicate_reading:"Duplicate reading"};
+const names = {sustained_usage:"Sustained consumption",meter_reset:"Counter reset",missing_reading:"Missing reading",billing_mismatch:"Billing mismatch",volume_mismatch:"Invoice volume mismatch",duplicate_reading:"Duplicate reading"};
 const states = {open:"Open",investigating:"Investigating",resolved:"Resolved",dismissed:"Dismissed"};
 let token = "", selectedCase = null, toastTimer, queueRequest = 0;
 let overviewDaily = [], chartPoints = [], chartRange = 90, chartIndex = 0;
+let billingRows = [], billingFilter = "attention";
 
 async function api(path, options = {}) {
   const headers = {...options.headers};
@@ -67,8 +68,20 @@ function casesTable(rows) {
   if (!rows.length) return '<div class="empty"><h3>No cases in this view.</h3><p>Try another filter, or review your completed investigations.</p></div>';
   return `<table><thead><tr><th scope="col">Investigation</th><th scope="col">Meter / district</th><th scope="col">Priority</th><th scope="col">Status</th><th scope="col">Amount to review</th><th scope="col"><span class="sr-only">Open case</span></th></tr></thead><tbody>${rows.map(r=>`<tr><td><button class="row-button" data-case="${esc(r.id)}">${esc(r.title)}</button><small>${esc(names[r.kind])} · ${esc(r.event_date)}</small></td><td><span class="mono">${esc(r.meter_id)}</span><small>${esc(r.district)} · ${esc(r.segment)}</small></td><td>${badge(r.severity)}</td><td>${badge(r.status)}</td><td>${r.amount_cents?euro(r.amount_cents):'<span class="muted">—</span>'}</td><td><button class="table-arrow" data-case="${esc(r.id)}" aria-label="Open ${esc(r.meter_id)} ${esc(r.title)}">↗</button></td></tr>`).join("")}</tbody></table>`;
 }
+function renderBilling() {
+  const matched=billingRows.filter(r=>r.status==="matched").length;
+  const mismatch=billingRows.filter(r=>r.status==="mismatch").length;
+  const unverified=billingRows.length-matched-mismatch;
+  $("#billing-summary").textContent=`${matched} matched · ${mismatch} volume differences · ${unverified} unverified periods. Differences are leads for review, not confirmed overcharges.`;
+  $$("[data-billing-filter]").forEach(button=>button.setAttribute("aria-pressed",String(button.dataset.billingFilter===billingFilter)));
+  const rows=(billingFilter==="all"?[...billingRows]:billingRows.filter(r=>r.status!=="matched"))
+    .sort((a,b)=>Number(b.status==="mismatch")-Number(a.status==="mismatch")||a.invoice_id.localeCompare(b.invoice_id));
+  const labels={matched:"Matched",mismatch:"Volume difference",missing_boundary:"Boundary reading missing",incomplete:"Reading gap",counter_reset:"Counter reset",invalid_period:"Invalid period"};
+  $("#billing-reconciliation").innerHTML=rows.length?`<table><thead><tr><th scope="col">Invoice / meter</th><th scope="col">Billed volume</th><th scope="col">Meter volume</th><th scope="col">Difference</th><th scope="col">Result</th><th scope="col">Investigation</th></tr></thead><tbody>${rows.map(r=>`<tr><td><strong>${esc(r.invoice_id)}</strong><small>${esc(r.meter_id)} · ${esc(r.district)}</small></td><td>${number(r.billed_volume_liters)} L</td><td>${r.measured_volume_liters===null?"—":`${number(r.measured_volume_liters)} L`}</td><td>${r.signed_volume_difference_liters===null?"—":`${r.signed_volume_difference_liters>0?"+":""}${number(r.signed_volume_difference_liters)} L`}</td><td>${esc(labels[r.status]||r.status)}${r.missing_days?`<small>${number(r.missing_days)} missing day(s)</small>`:""}${r.reset_events?`<small>${number(r.reset_events)} reset(s)</small>`:""}</td><td>${r.case_id?`<button class="row-button" data-case="${esc(r.case_id)}">Open case →</button>`:"—"}</td></tr>`).join("")}</tbody></table>`:'<p class="empty">No invoice periods need review.</p>';
+}
 async function loadOverview() {
-  const [data, rows] = await Promise.all([api("/api/overview"),api("/api/cases?status=active")]);
+  const [data, rows, billing] = await Promise.all([api("/api/overview"),api("/api/cases?status=active"),api("/api/billing/reconciliation")]);
+  billingRows=billing;renderBilling();
   $("#metrics").innerHTML = metric("Connected meters", number(data.meters), `${number(data.readings)} accepted readings`,"gauge") + metric("Active investigations",number(data.active_cases),"<b>Explainable</b> · awaiting operator action","clipboard-list") + metric("Invoice amount to review",euro(data.review_amount_cents),"Discrepancies, not confirmed savings","badge-euro") + metric("Row acceptance rate",`${data.quality_rate.toFixed(2)}%`,`${number(data.rejected_rows)} rows safely quarantined`,"circle-check",true);
   $("#nav-count").textContent=data.active_cases;
   $("#priority-count").textContent=rows.length;
@@ -102,8 +115,17 @@ async function showCase(id) {
   const item=await api(`/api/cases/${encodeURIComponent(id)}`); selectedCase=item;
   $("#case-meter").textContent=`${item.meter_id} / ${names[item.kind]}`;
   const transitions={open:["investigating","dismissed"],investigating:["resolved","dismissed","open"],resolved:["open"],dismissed:["open"]};
-  const meaningful=Object.entries(item.evidence).filter(([k])=>k!=="rule_version");
-  $("#case-content").innerHTML=`<h2 id="case-title" style="font-size:25px;letter-spacing:-.7px">${esc(item.title)}</h2><div class="case-meta">${badge(item.severity)}${badge(item.status)}<span class="pill">Event ${esc(item.event_date)}</span></div><p class="case-explanation">${esc(item.explanation)}</p><div class="case-evidence">${meaningful.map(([k,v])=>`<div class="evidence-cell"><span>${esc(k.replaceAll("_"," "))}</span><strong>${esc(Array.isArray(v)?v.join(" · "):v)}</strong></div>`).join("")}</div><h3>Meter consumption history <span class="muted">· m³ / day</span></h3><div class="case-chart">${chart(item.readings.slice(-35).map(r=>({date:r.reading_date,value:r.consumption_liters===null?null:r.consumption_liters/1000})),{height:190,threshold:item.evidence.threshold_liters?item.evidence.threshold_liters/1000:null,label:`Daily consumption for ${item.meter_id} in m³`})}</div><p class="muted" style="font-size:10px">Gaps indicate unavailable daily consumption. ${item.evidence.threshold_liters?"Dashed line: detection threshold.":""}</p><form id="case-form" class="case-form"><h3>Record your investigation</h3><label>Next status<select id="next-status">${transitions[item.status].map(s=>`<option value="${s}">${states[s]}</option>`).join("")}</select></label><div></div><label class="full">Investigation note<textarea id="case-note" minlength="5" maxlength="1000" required placeholder="What did you check, and why are you changing this status?"></textarea></label><button class="button primary" type="submit">Save decision →</button><span class="muted" style="font-size:10px">Local demo operator · revision ${item.version}</span></form><div style="margin-top:25px"><h3>Decision history</h3>${item.history.length?`<ol class="history-list">${item.history.map(h=>`<li><strong>${esc(states[h.from_status])} → ${esc(states[h.to_status])}</strong><p>${esc(h.note)}</p><time>${esc(new Date(h.at).toLocaleString("en-GB"))} · ${esc(h.actor)}</time></li>`).join("")}</ol>`:'<p class="muted" style="font-size:11px;margin-top:12px">No operator decisions yet.</p>'}</div>`;
+  const evidence=item.kind==="volume_mismatch"?[
+    ["Invoice",item.evidence.invoice_id],
+    ["Billing period",`${item.evidence.period_start} → ${item.evidence.period_end}`],
+    ["Stated volume",`${number(item.evidence.billed_volume_liters)} L`],
+    ["Meter volume",`${number(item.evidence.measured_volume_liters)} L`],
+    ["Difference",`${item.evidence.signed_volume_difference_liters>0?"+":""}${number(item.evidence.signed_volume_difference_liters)} L`],
+    ["Tolerance",`${number(item.evidence.tolerance_liters)} L`],
+    ["Evidence coverage","All daily readings present · no reset"],
+    ["Financial interpretation","Review required · no confirmed overcharge"],
+  ]:Object.entries(item.evidence).filter(([k])=>k!=="rule_version").map(([k,v])=>[k.replaceAll("_"," "),Array.isArray(v)?v.join(" · "):v]);
+  $("#case-content").innerHTML=`<h2 id="case-title" style="font-size:25px;letter-spacing:-.7px">${esc(item.title)}</h2><div class="case-meta">${badge(item.severity)}${badge(item.status)}<span class="pill">Event ${esc(item.event_date)}</span></div><p class="case-explanation">${esc(item.explanation)}</p><div class="case-evidence">${evidence.map(([label,value])=>`<div class="evidence-cell"><span>${esc(label)}</span><strong>${esc(value)}</strong></div>`).join("")}</div><h3>Meter consumption history <span class="muted">· m³ / day</span></h3><div class="case-chart">${chart(item.readings.slice(-35).map(r=>({date:r.reading_date,value:r.consumption_liters===null?null:r.consumption_liters/1000})),{height:190,threshold:item.evidence.threshold_liters?item.evidence.threshold_liters/1000:null,label:`Daily consumption for ${item.meter_id} in m³`})}</div><p class="muted" style="font-size:10px">Gaps indicate unavailable daily consumption. ${item.evidence.threshold_liters?"Dashed line: detection threshold.":""}</p><form id="case-form" class="case-form"><h3>Record your investigation</h3><label>Next status<select id="next-status">${transitions[item.status].map(s=>`<option value="${s}">${states[s]}</option>`).join("")}</select></label><div></div><label class="full">Investigation note<textarea id="case-note" minlength="5" maxlength="1000" required placeholder="What did you check, and why are you changing this status?"></textarea></label><button class="button primary" type="submit">Save decision →</button><span class="muted" style="font-size:10px">Local demo operator · revision ${item.version}</span></form><div style="margin-top:25px"><h3>Decision history</h3>${item.history.length?`<ol class="history-list">${item.history.map(h=>`<li><strong>${esc(states[h.from_status])} → ${esc(states[h.to_status])}</strong><p>${esc(h.note)}</p><time>${esc(new Date(h.at).toLocaleString("en-GB"))} · ${esc(h.actor)}</time></li>`).join("")}</ol>`:'<p class="muted" style="font-size:11px;margin-top:12px">No operator decisions yet.</p>'}</div>`;
   if(!$("#case-dialog").open) $("#case-dialog").showModal();
   $("#case-form").addEventListener("submit",saveDecision);
 }
@@ -140,6 +162,7 @@ async function initialize() {
 }
 window.addEventListener("hashchange",navigate);
 document.addEventListener("click",event=>{const caseButton=event.target.closest("[data-case]"),runButton=event.target.closest("[data-run]"),kindButton=event.target.closest("[data-kind]"),rangeButton=event.target.closest("[data-range]");if(caseButton)showCase(caseButton.dataset.case).catch(e=>toast(e.message,true));if(runButton)showRun(runButton.dataset.run).catch(e=>toast(e.message,true));if(kindButton){$("#kind-filter").value=kindButton.dataset.kind;$("#status-filter").value="active";$("#case-search").value="";location.hash="investigations";}if(rangeButton){chartRange=Number(rangeButton.dataset.range);renderOverviewChart();}});
+$$("[data-billing-filter]").forEach(button=>button.addEventListener("click",()=>{billingFilter=button.dataset.billingFilter;renderBilling();}));
 $("#network-chart").addEventListener("pointermove",event=>{const svg=$("svg",event.currentTarget);if(!svg || !chartPoints.length)return;const rect=svg.getBoundingClientRect(),relative=(event.clientX-rect.left)/rect.width;setChartCursor(Math.round((relative*720-42)/666*(chartPoints.length-1)));});
 $("#network-chart").addEventListener("keydown",event=>{if(!["ArrowLeft","ArrowRight","Home","End"].includes(event.key))return;event.preventDefault();setChartCursor(event.key==="Home"?0:event.key==="End"?chartPoints.length-1:chartIndex+(event.key==="ArrowLeft"?-1:1));});
 $("#clear-filters").addEventListener("click",()=>{$("#case-search").value="";$("#status-filter").value="active";$("#kind-filter").value="all";loadQueue().catch(e=>toast(e.message,true));});

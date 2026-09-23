@@ -8,13 +8,13 @@ This independent portfolio project is inspired by Moundir Houazar's experience w
 
 ## Delivered solution
 
-The pipeline reads daily cumulative meter observations, validates records, preserves provenance and quarantines problematic rows. Five explained exception types feed an investigation queue. An operator can inspect the underlying meter history, change the case status and retain a decision note. dbt builds an analytical model for a three-page Power BI report.
+The pipeline reads daily cumulative meter observations, validates records, preserves provenance and quarantines problematic rows. Six explained exception types feed an investigation queue. An operator can inspect the underlying meter history, change the case status and retain a decision note. dbt builds an analytical model for a four-page Power BI report.
 
 ## Experimental design
 
 120 meters, 90 observation dates, residential and commercial baselines, controlled noise, one-day benign spikes and known anomalies. The baseline contains 10,804 incoming rows: 10,796 accepted and 8 quarantined. Of the quarantined rows, five are duplicates; three have invalid values, dates or meter references.
 
-The label file contains 29 events: six clear sustained-use anomalies, four subtle sustained-use anomalies, four counter resets, four missing-reading events, six tariff mismatches and five duplicates. Detection is evaluated by exact meter/type/onset-date matching.
+The label file contains 31 events: six clear sustained-use anomalies, four subtle sustained-use anomalies, four counter resets, four missing-reading events, six tariff mismatches, two invoice-volume mismatches and five duplicates. The volume-error invoices still have correct tariff arithmetic for their stated volumes. Detection is evaluated by exact meter/type/onset-date matching.
 
 ## Results
 
@@ -24,12 +24,13 @@ The label file contains 29 events: six clear sustained-use anomalies, four subtl
 | Counter reset | 4 | 0 | 0 |
 | Missing reading | 4 | 0 | 0 |
 | Billing mismatch | 6 | 0 | 0 |
+| Invoice volume mismatch | 2 | 0 | 0 |
 | Duplicate reading | 5 | 0 | 0 |
-| **Total** | **25** | **0** | **4** |
+| **Total** | **27** | **0** | **4** |
 
-This gives 100% synthetic precision and 86.2% synthetic recall. Seeds 71 and 103 produce the same event results while varying consumption values. They reuse the event templates and therefore do not establish external generalization.
+This gives 100% synthetic precision and 87.1% synthetic recall. Seeds 71 and 103 produce the same event results while varying consumption values. They reuse the event templates and therefore do not establish external generalization.
 
-The six invoice discrepancies total €255 in the fixture. This is a simulated amount requiring review, not money saved or recovered. Timings are recorded in `benchmark.json`; they depend on the test machine and are not a service-level guarantee.
+The six tariff-arithmetic discrepancies total €255 in the fixture. The two separate volume differences total 20 m³ in absolute value; they are not converted into confirmed monetary loss. Timings are recorded in `benchmark.json`; they depend on the test machine and are not a service-level guarantee.
 
 ## Why the result is useful
 

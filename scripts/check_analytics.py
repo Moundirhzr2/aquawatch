@@ -8,6 +8,7 @@ from sqlalchemy import text
 from aquawatch import db
 from aquawatch.detection import series
 from aquawatch.pipeline import records
+from aquawatch.reconciliation import reconcile_invoice
 from aquawatch.synthetic import invoice_amount
 
 
@@ -27,7 +28,9 @@ def check(target):
             sql_invoices = [
                 dict(r)
                 for r in conn.execute(
-                    text("select invoice_id, expected_amount_cents from analytics.fct_billing")
+                    text(
+                        "select invoice_id, expected_amount_cents, volume_status, measured_volume_liters, signed_volume_difference_liters, missing_days, reset_events from analytics.fct_billing"
+                    )
                 ).mappings()
             ]
     if target == "local":
@@ -41,9 +44,22 @@ def check(target):
                 ).fetchall()
             ]
             sql_invoices = [
-                dict(zip(["invoice_id", "expected_amount_cents"], r))
+                dict(
+                    zip(
+                        [
+                            "invoice_id",
+                            "expected_amount_cents",
+                            "volume_status",
+                            "measured_volume_liters",
+                            "signed_volume_difference_liters",
+                            "missing_days",
+                            "reset_events",
+                        ],
+                        r,
+                    )
+                )
                 for r in conn.execute(
-                    "select invoice_id, expected_amount_cents from fct_billing"
+                    "select invoice_id, expected_amount_cents, volume_status, measured_volume_liters, signed_volume_difference_liters, missing_days, reset_events from fct_billing"
                 ).fetchall()
             ]
     grouped = defaultdict(list)
@@ -66,8 +82,24 @@ def check(target):
     assert expected_invoices == {
         r["invoice_id"]: r["expected_amount_cents"] for r in sql_invoices
     }, "Tariff rounding differs between Python and SQL"
+    sql_by_invoice = {r["invoice_id"]: r for r in sql_invoices}
+    for invoice in invoices:
+        python = reconcile_invoice(invoice, grouped[invoice["meter_id"]])
+        sql = sql_by_invoice[invoice["id"]]
+        for key in [
+            "status",
+            "measured_volume_liters",
+            "signed_volume_difference_liters",
+            "missing_days",
+            "reset_events",
+        ]:
+            sql_key = "volume_status" if key == "status" else key
+            assert python[key] == sql[sql_key], (
+                f"Volume reconciliation differs for {invoice['id']} at {key}: "
+                f"Python={python[key]}, SQL={sql[sql_key]}"
+            )
     print(
-        f"Python / {target} SQL parity passed for {len(expected)} observations and {len(expected_invoices)} invoices"
+        f"Python / {target} SQL parity passed for {len(expected)} observations and {len(expected_invoices)} invoice arithmetic/volume comparisons"
     )
 
 

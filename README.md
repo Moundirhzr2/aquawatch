@@ -18,11 +18,13 @@ The brand mark, favicon and interface icons use locally bundled [Lucide icons vi
 
 1. Import a daily readings file.
 2. Validate the schema and quarantine duplicates or invalid records.
-3. Detect suspicious consumption, backwards counters, missing readings and tariff mismatches.
+3. Detect suspicious consumption, backwards counters, missing readings, tariff mismatches and invoice-volume differences.
 4. Open a case, inspect its evidence and record an investigation decision.
 5. Transform operational data with dbt and analyze the resulting marts in Power BI.
 
 An exact file replay does not duplicate readings, runs or cases. Human case decisions survive pipeline reruns. Missing days and meter resets produce **null daily consumption**, not invented usage.
+
+The [invoice reconciliation walkthrough](docs/invoice-reconciliation.md) shows the new distinction between tariff arithmetic, measured volume differences and unverified periods; see the [investigation screenshot](docs/images/reconciliation.png).
 
 ## Run locally
 
@@ -68,11 +70,11 @@ aquawatch analytics
 python scripts/build_powerbi.py --data-dir "C:/absolute/path/to/aquawatch/powerbi/data"
 ```
 
-The analytics command exports the operational tables, runs **dbt build**, generates dbt documentation and exports seven marts. Open `powerbi/AquaWatch.pbip` in Power BI Desktop and refresh the data. It contains three report pages: **Network overview**, **Data quality**, and **Billing review**, with a semantic model, DAX measures and single-direction relationships.
+The analytics command exports the operational tables, runs **dbt build**, generates dbt documentation and exports seven marts. Open `powerbi/AquaWatch.pbip` in Power BI Desktop and refresh the data. It contains four report pages: **Network overview**, **Data quality**, **Billing review**, and **Volume reconciliation**, with a semantic model, DAX measures and single-direction relationships.
 
 The checked-in report is portable source. Its `DataFolder` parameter defaults to `C:/AquaWatch/powerbi/data`; the command above sets the path on your computer. See [Power BI setup](powerbi/README.md) and [metric definitions](docs/metric-definitions.md).
 
-Native Power Query refresh and DAX validation passed for all 14 measures, seven tables, four districts and 90 dates against the CSV snapshot. PBIP opening, Desktop refresh and all three populated pages are confirmed by user screenshots. The updated formatting on all three pages is also confirmed, including exact card totals and readable table headers. The user manually confirmed that Billing review district selections update the linked visuals. See [Power BI validation](docs/powerbi-validation.md) for the repeatable engine check and expected totals.
+The previous three-page model passed native Power Query refresh and DAX validation for its 14 measures, seven tables, four districts and 90 dates. The fourth page and four new measures are generated and covered by mart tests and Python/SQL parity, but require a fresh Power BI Desktop refresh for native confirmation. See [Power BI validation](docs/powerbi-validation.md) for the repeatable engine check and earlier evidence.
 
 ## Architecture
 
@@ -102,7 +104,7 @@ flowchart LR
 
 ## Measured synthetic benchmark
 
-The baseline covers **120 meters over 90 dates**, with **10,796 accepted readings**, **8 quarantined rows**, and **29 labeled events**. The rules detect **25** and miss **4** deliberately subtle consumption events: **100% precision and 86.2% recall** under exact event matching. These are synthetic benchmark results, not field performance claims.
+The baseline covers **120 meters over 90 dates**, with **10,796 accepted readings**, **8 quarantined rows**, and **31 labeled events**. The rules detect **27** and miss **4** deliberately subtle consumption events: **100% precision and 87.1% recall** under exact event matching. These are synthetic benchmark results, not field performance claims.
 
 ```bash
 aquawatch benchmark
@@ -145,7 +147,7 @@ docs/              architecture, benchmark, decisions and interview walkthrough
 
 - Daily cumulative meter readings; integer liters and cents; a deliberately simplified synthetic tariff.
 - Rules flag **possible** issues. They do not confirm a leak, fraud, liability or financial savings.
-- Billing checks verify tariff arithmetic from the **stated invoice volume**. Meter-to-invoice volume reconciliation across gaps/resets and effective-dated tariffs is not implemented.
+- Billing checks separately verify tariff arithmetic from the **stated invoice volume** and compare that volume with complete, reset-free meter periods. Missing boundary readings, gaps and resets remain unverified; effective-dated tariff changes and confirmed overcharge estimation are not implemented. See [invoice reconciliation](docs/invoice-reconciliation.md).
 - Row acceptance rate is not a completeness or freshness score. The dashboard describes its denominator.
 - Case status is operational. dbt/Power BI are snapshots refreshed by the analytics command.
 - Local single-operator demo, one API worker, bounded 5 MB files. Concurrent status edits are guarded; multi-process ingestion orchestration, user authentication, tenant isolation, background job queues, migrations and production deployment are future work.

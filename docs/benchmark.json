@@ -5,15 +5,15 @@
   "runs": [
     {
       "seed": 42,
-      "seconds": 0.227,
+      "seconds": 0.286,
       "accepted_rows": 10796,
       "quarantined_rows": 8,
       "scope": "Synthetic event benchmark; exact meter/type/event-start-date match. Not field validation.",
-      "true_positives": 25,
+      "true_positives": 27,
       "false_positives": 0,
       "false_negatives": 4,
       "precision": 1.0,
-      "recall": 0.8620689655172413,
+      "recall": 0.8709677419354839,
       "by_kind": {
         "billing_mismatch": {
           "tp": 6,
@@ -39,6 +39,11 @@
           "tp": 6,
           "fp": 0,
           "fn": 4
+        },
+        "volume_mismatch": {
+          "tp": 2,
+          "fp": 0,
+          "fn": 0
         }
       },
       "missed_events": [
@@ -72,15 +77,15 @@
     },
     {
       "seed": 71,
-      "seconds": 0.206,
+      "seconds": 0.274,
       "accepted_rows": 10796,
       "quarantined_rows": 8,
       "scope": "Synthetic event benchmark; exact meter/type/event-start-date match. Not field validation.",
-      "true_positives": 25,
+      "true_positives": 27,
       "false_positives": 0,
       "false_negatives": 4,
       "precision": 1.0,
-      "recall": 0.8620689655172413,
+      "recall": 0.8709677419354839,
       "by_kind": {
         "billing_mismatch": {
           "tp": 6,
@@ -106,6 +111,11 @@
           "tp": 6,
           "fp": 0,
           "fn": 4
+        },
+        "volume_mismatch": {
+          "tp": 2,
+          "fp": 0,
+          "fn": 0
         }
       },
       "missed_events": [
@@ -139,15 +149,15 @@
     },
     {
       "seed": 103,
-      "seconds": 0.208,
+      "seconds": 0.263,
       "accepted_rows": 10796,
       "quarantined_rows": 8,
       "scope": "Synthetic event benchmark; exact meter/type/event-start-date match. Not field validation.",
-      "true_positives": 25,
+      "true_positives": 27,
       "false_positives": 0,
       "false_negatives": 4,
       "precision": 1.0,
-      "recall": 0.8620689655172413,
+      "recall": 0.8709677419354839,
       "by_kind": {
         "billing_mismatch": {
           "tp": 6,
@@ -173,6 +183,11 @@
           "tp": 6,
           "fp": 0,
           "fn": 4
+        },
+        "volume_mismatch": {
+          "tp": 2,
+          "fp": 0,
+          "fn": 0
         }
       },
       "missed_events": [

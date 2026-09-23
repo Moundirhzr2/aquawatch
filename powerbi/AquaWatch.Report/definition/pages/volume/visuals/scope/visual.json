@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Scope: stated invoice volume × synthetic tariff + fixed fee. See Volume reconciliation for the separate meter comparison.",
+                    "value": "Only complete periods with both boundary readings and no reset are compared. A gap or reset is unverified, not a volume error. More than 1 m³ difference prompts review; no overcharge is confirmed.",
                     "textStyle": {
                       "fontFamily": "Segoe UI",
                       "fontSize": "12pt",

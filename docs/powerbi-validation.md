@@ -1,5 +1,7 @@
 # Power BI validation
 
+**23 September update:** The current source has four pages and 18 measures after adding invoice-volume reconciliation. The earlier Desktop evidence below applies to the three-page, 14-measure version only. The new dbt mart, Python/SQL invoice-by-invoice parity and PBIP repository checks pass; a fresh native Desktop refresh and visual check of the fourth page are still required. The current CSV snapshot has 27 active cases, EUR 14,155.84 billed, EUR 13,900.84 expected, two volume mismatches, eight unverified periods and 20.0 m³ of volume to review.
+
 The source semantic model passed a native Power Query refresh and DAX execution check on 2026-09-13 using the local Analysis Services engine shipped with Power BI Desktop. All 14 measures, seven table counts, four district groups and 90 date groups matched independently calculated CSV results. The grouped queries exercise all seven model relationships.
 
 This check loads the source model into a new temporary database on an identified local Desktop engine. It preserves the source's `en-US` culture and changes only the in-memory CSV folder parameter to the repository's data directory. It does not modify existing report databases or source files. The temporary database is removed after the queries finish.
@@ -12,7 +14,7 @@ A manual opening attempt on 2026-09-13 identified a missing `definition/version.
 
 **The corrected formatting is visually confirmed on all three pages in Preview 2.** The screenshots show one title per card, larger values, readable table headers, and fully visible chart categories. Data quality displays exactly 10,796 accepted rows, eight quarantined rows and 99.93% acceptance. Billing review displays EUR 14,142.84 billed, EUR 13,887.84 expected, EUR 255.00 to review and six flagged invoices. These match the independently validated model results. Evidence: [Network overview](images/powerbi-network-preview-2.png), [Data quality](images/powerbi-quality-preview-2.png), [Billing review](images/powerbi-billing-preview-2.png).
 
-The generator supplies the required card instance selectors, removes internal card outlines, and gives bar-chart labels more space. See Microsoft's [card formatting reference](https://github.com/microsoft/skills-for-fabric/blob/main/plugins/powerbi-authoring/skills/powerbi-report-authoring/references/card.md) for the selector requirement. The repository check rejects unscoped card settings. All 34 report definitions and 18 non-text visual formatting configurations passed Microsoft's published schemas. The semantic model is unchanged. Billing review district selection was manually checked by the user, who confirmed that the linked visuals update. Model-level district/date filter behavior passed separately. This establishes the demonstrated interactions, not exhaustive testing of every combination of selections.
+The generator supplies the required card instance selectors, removes internal card outlines, and gives bar-chart labels more space. See Microsoft's [card formatting reference](https://github.com/microsoft/skills-for-fabric/blob/main/plugins/powerbi-authoring/skills/powerbi-report-authoring/references/card.md) for the selector requirement. The repository check rejects unscoped card settings. In the earlier version, all 34 report definitions and 18 non-text visual formatting configurations passed Microsoft's published schemas. Billing review district selection was manually checked by the user, who confirmed that the linked visuals update. Model-level district/date filter behavior passed separately. This establishes the demonstrated interactions, not exhaustive testing of every combination of selections.
 
 ## Reproduce the native check
 
@@ -27,7 +29,7 @@ python scripts/check_powerbi_results.py
 
 The script identifies the selected Desktop process by its exact report path, finds its child model engine and connects only to that engine's localhost port. Results are written to ignored `runtime/powerbi-validation`. The Python check compares those results with the seven CSVs, including counts and filter behavior. Run both commands; successful query execution alone does not establish numerical parity.
 
-The checked-in [validation summary](powerbi-validation.json) records the tested engine version, results and SHA-256 hashes of the input CSV snapshot. Regenerating the marts changes the snapshot and requires a new validation run. The live web application may contain later imports or investigation decisions.
+The checked-in [validation summary](powerbi-validation.json) records the earlier tested engine version, results and SHA-256 hashes of its input CSV snapshot. It is a historical record, not validation of the current volume page or CSV snapshot. Regenerating the marts changes the snapshot and requires a new validation run. The live web application may contain later imports or investigation decisions.
 
 ## Remaining visual check
 
@@ -39,15 +41,19 @@ Use the [Power BI setup](../powerbi/README.md) to set the CSV folder, open the P
 | Readings / accepted rows | 10,796 |
 | Consumption | 3,955.375 m³ before display rounding |
 | Valid interval share | 98.81% |
-| Active investigations | 25 |
+| Active investigations | 27 |
 | Active amount to review | EUR 255.00 |
 | Quarantined rows | 8 |
 | Acceptance rate | 99.93% |
-| Billed amount | EUR 14,142.84 |
-| Expected amount | EUR 13,887.84 |
+| Billed amount | EUR 14,155.84 |
+| Expected amount | EUR 13,900.84 |
 | Flagged invoices | 6 |
+| Comparable invoice periods | 112 |
+| Volume mismatches | 2 |
+| Unverified invoice periods | 8 |
+| Volume to review | 20.0 m³ |
 
-Inspect Network overview, Data quality and Billing review for visual errors, clipped text, readable dates and correctly formatted amounts. Verify that district selections affect meter-level consumption, cases and invoices; `network_daily` is a network aggregate and is intentionally not related to the meter dimension. Clear all selections before comparing the totals above. Capture a screenshot of each page only after the report renders successfully.
+Inspect Network overview, Data quality, Billing review and Volume reconciliation for visual errors, clipped text, readable dates and correctly formatted amounts. Verify that district selections affect meter-level consumption, cases and invoices; `network_daily` is a network aggregate and is intentionally not related to the meter dimension. Clear all selections before comparing the totals above. Capture a screenshot of each page only after the report renders successfully.
 
 Microsoft documents the [Tabular Object Model](https://learn.microsoft.com/en-us/analysis-services/tom/tom-pbi-datasets), [client libraries](https://learn.microsoft.com/en-us/analysis-services/client-libraries) and [Desktop external-tool model operations](https://learn.microsoft.com/en-us/power-bi/transform-model/desktop-external-tools).
 

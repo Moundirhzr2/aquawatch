@@ -39,6 +39,14 @@ def check(data_dir, results_dir):
         "Billed amount EUR": total(invoices, "billed_amount_cents") / 100,
         "Expected amount EUR": total(invoices, "expected_amount_cents") / 100,
         "Flagged invoices": sum(int(row["review_amount_cents"]) > 0 for row in invoices),
+        "Comparable invoices": sum(
+            row["volume_status"] in {"matched", "mismatch"} for row in invoices
+        ),
+        "Volume mismatches": sum(row["volume_status"] == "mismatch" for row in invoices),
+        "Unverified invoices": sum(
+            row["volume_status"] not in {"matched", "mismatch"} for row in invoices
+        ),
+        "Volume to review m3": total(invoices, "volume_review_liters") / 1000,
         "Active investigations": len(active),
         "Case count": len(cases),
         "Active amount to review EUR": total(active, "amount_cents") / 100,
