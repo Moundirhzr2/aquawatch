@@ -25,8 +25,8 @@ function toast(message, error = false) {
   const node = $("#toast"); node.textContent = message; node.classList.toggle("error", error); node.hidden = false;
   toastTimer = setTimeout(() => { node.hidden = true; }, error ? 10000 : 6500);
 }
-function metric(label, value, note, symbol, accent = false) {
-  return `<article class="metric ${accent ? "accent" : ""}"><div class="metric-head"><span>${esc(label)}</span><span class="metric-symbol" aria-hidden="true">${symbol}</span></div><strong>${esc(value)}</strong><p class="metric-note">${note}</p></article>`;
+function metric(label, value, note, icon, accent = false) {
+  return `<article class="metric ${accent ? "accent" : ""}"><div class="metric-head"><span>${esc(label)}</span><span class="metric-symbol" aria-hidden="true"><span class="icon icon-${icon}"></span></span></div><strong>${esc(value)}</strong><p class="metric-note">${note}</p></article>`;
 }
 function badge(status) { return `<span class="badge ${esc(status)}">${esc(states[status] || status[0].toUpperCase()+status.slice(1))}</span>`; }
 function chart(points, {height=200, threshold=null, label="Daily consumption in cubic meters", interactive=false} = {}) {
@@ -69,7 +69,7 @@ function casesTable(rows) {
 }
 async function loadOverview() {
   const [data, rows] = await Promise.all([api("/api/overview"),api("/api/cases?status=active")]);
-  $("#metrics").innerHTML = metric("Connected meters", number(data.meters), `${number(data.readings)} accepted readings`,"◫") + metric("Active investigations",number(data.active_cases),"<b>Explainable</b> · awaiting operator action","⌕") + metric("Invoice amount to review",euro(data.review_amount_cents),"Discrepancies, not confirmed savings","€") + metric("Row acceptance rate",`${data.quality_rate.toFixed(2)}%`,`${number(data.rejected_rows)} rows safely quarantined`,"✓",true);
+  $("#metrics").innerHTML = metric("Connected meters", number(data.meters), `${number(data.readings)} accepted readings`,"gauge") + metric("Active investigations",number(data.active_cases),"<b>Explainable</b> · awaiting operator action","clipboard-list") + metric("Invoice amount to review",euro(data.review_amount_cents),"Discrepancies, not confirmed savings","badge-euro") + metric("Row acceptance rate",`${data.quality_rate.toFixed(2)}%`,`${number(data.rejected_rows)} rows safely quarantined`,"circle-check",true);
   $("#nav-count").textContent=data.active_cases;
   $("#priority-count").textContent=rows.length;
   $("#hero-meter-count").textContent=`${number(data.meters)} connected meters`;
@@ -95,7 +95,7 @@ async function loadRuns() {
 }
 async function loadEvaluation() {
   const result=await api("/api/evaluation");
-  $("#evaluation-metrics").innerHTML=metric("Synthetic precision",result.precision===null?"N/A":`${(result.precision*100).toFixed(1)}%`,"Correctly matched / detected events","◎")+metric("Synthetic recall",result.recall===null?"N/A":`${(result.recall*100).toFixed(1)}%`,"Correctly matched / labeled events","↗")+metric("Matched events",result.true_positives,"Exact meter, type and onset date","✓")+metric("Missed events",result.false_negatives,"Limitations included in evaluation","!",true);
+  $("#evaluation-metrics").innerHTML=metric("Synthetic precision",result.precision===null?"N/A":`${(result.precision*100).toFixed(1)}%`,"Correctly matched / detected events","target")+metric("Synthetic recall",result.recall===null?"N/A":`${(result.recall*100).toFixed(1)}%`,"Correctly matched / labeled events","trending-up")+metric("Matched events",result.true_positives,"Exact meter, type and onset date","circle-check")+metric("Missed events",result.false_negatives,"Limitations included in evaluation","triangle-alert",true);
   $("#evaluation-table").innerHTML=`<table><caption class="sr-only">Synthetic event detection benchmark</caption><thead><tr><th>Exception</th><th>Matched</th><th>False alerts</th><th>Missed</th></tr></thead><tbody>${Object.entries(result.by_kind).map(([k,v])=>`<tr><td>${esc(names[k])}</td><td>${v.tp}</td><td>${v.fp}</td><td>${v.fn}</td></tr>`).join("")}</tbody></table>`;
 }
 async function showCase(id) {

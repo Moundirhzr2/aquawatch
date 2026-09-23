@@ -4,7 +4,7 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="AquaWatch: explainable water consumption and billing investigations. A synthetic data portfolio project by Moundir Houazar.">
   <title>AquaWatch · Utility intelligence</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='12' fill='%23106e68'/%3E%3Ctext x='10' y='29' fill='white' font-family='Arial' font-size='27'%3EA%3C/text%3E%3C/svg%3E">
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
   <link rel="stylesheet" href="/static/styles.css">
   <link rel="stylesheet" href="/static/experience.css">
   <script src="/static/app.js" defer></script>
@@ -12,14 +12,14 @@
 <body>
 <a href="#main" class="skip">Skip to content</a>
 <aside class="sidebar">
-  <a class="brand" href="#overview" aria-label="AquaWatch overview"><span class="brand-mark">a<span>≈</span></span><span>AquaWatch<small>UTILITY INTELLIGENCE</small></span></a>
+  <a class="brand" href="#overview" aria-label="AquaWatch overview"><span class="brand-mark"><span class="icon icon-droplets" aria-hidden="true"></span></span><span>AquaWatch<small>UTILITY INTELLIGENCE</small></span></a>
   <div class="workspace"><span class="workspace-icon">M</span><div>Mulhouse network<small>Synthetic demonstration</small></div><span class="live-dot"></span></div>
   <p class="nav-label">WORKSPACE</p>
   <nav aria-label="Main navigation">
-    <a href="#overview" class="nav-link active" data-view="overview"><span class="nav-icon">◫</span> Overview</a>
-    <a href="#investigations" class="nav-link" data-view="investigations"><span class="nav-icon">⌕</span> Investigations <span id="nav-count" class="nav-count">—</span></a>
-    <a href="#pipeline" class="nav-link" data-view="pipeline"><span class="nav-icon">⇄</span> Data pipeline</a>
-    <a href="#methodology" class="nav-link" data-view="methodology"><span class="nav-icon">◎</span> Model & evidence</a>
+    <a href="#overview" class="nav-link active" data-view="overview"><span class="nav-icon icon icon-layout-dashboard" aria-hidden="true"></span> Overview</a>
+    <a href="#investigations" class="nav-link" data-view="investigations"><span class="nav-icon icon icon-search-check" aria-hidden="true"></span> Investigations <span id="nav-count" class="nav-count">—</span></a>
+    <a href="#pipeline" class="nav-link" data-view="pipeline"><span class="nav-icon icon icon-workflow" aria-hidden="true"></span> Data pipeline</a>
+    <a href="#methodology" class="nav-link" data-view="methodology"><span class="nav-icon icon icon-scan-eye" aria-hidden="true"></span> Model & evidence</a>
   </nav>
   <div class="sidebar-bottom"><div class="demo-badge"><span class="live-dot"></span> SYNTHETIC DATA ONLY</div><p>From raw readings<br>to informed decisions.</p><div class="author"><span class="avatar">MH</span><div>Moundir Houazar<small>Data engineering portfolio</small></div></div></div>
 </aside>
@@ -28,7 +28,7 @@
   <main id="main" tabindex="-1">
     <div id="load-error" class="error-banner" hidden></div>
     <section id="view-overview" class="view">
-      <div class="page-heading dashboard-hero"><div class="hero-copy"><p class="eyebrow">WATER OPERATIONS / LIVE DEMO</p><h1>Every reading tells a story.</h1><p class="subtitle">From raw meter signals to investigations you can explain, verify and act on.</p><div class="hero-tags"><span id="hero-meter-count">Connected meters</span><span>Traceable decisions</span><span>Synthetic data</span></div></div><div class="hero-action"><span class="hero-action-label">NEXT OPERATION</span><p>Refresh the daily evidence</p><button class="button primary import-demo">↻ <span>Run daily import</span></button></div></div>
+      <div class="page-heading dashboard-hero"><div class="hero-copy"><p class="eyebrow">WATER OPERATIONS / LIVE DEMO</p><h1>Every reading tells a story.</h1><p class="subtitle">From raw meter signals to investigations you can explain, verify and act on.</p><div class="hero-tags"><span id="hero-meter-count">Connected meters</span><span>Traceable decisions</span><span>Synthetic data</span></div></div><div class="hero-action"><span class="hero-action-label">NEXT OPERATION</span><p>Refresh the daily evidence</p><button class="button primary import-demo"><span class="icon icon-refresh-cw" aria-hidden="true"></span><span>Run daily import</span></button></div></div>
       <div class="period-line"><span class="pill">Demonstration network</span><span id="period">Loading observation period…</span><span class="right muted">Daily readings · EUR · m³</span></div>
       <div class="metrics" id="metrics"><div class="metric"><span>Loading network</span><strong>—</strong></div></div>
       <div class="chart-grid">
@@ -36,15 +36,15 @@
         <article class="panel breakdown"><div class="panel-head"><div><h2>What needs attention</h2><p>Open and investigating cases</p></div></div><div id="kind-breakdown"></div><div class="breakdown-footer"><span class="small-label">AN INVESTIGATION, NOT A VERDICT</span><p>Alerts explain what changed.<br>An operator decides what it means.</p></div></article>
       </div>
       <article class="panel"><div class="panel-head"><div><h2>Priority investigations <span class="small-pill" id="priority-count">—</span></h2><p>High priority first, then invoice amount requiring review</p></div><a href="#investigations" class="text-link">View all cases →</a></div><p class="table-scroll-hint">Swipe sideways to see priority, status and review amount →</p><div id="priority-table" class="table-scroll"></div></article>
-      <div class="provenance-strip"><span class="provenance-icon">✓</span><div><strong>Traceable by design</strong><span>Every reading links to an import. Every decision leaves a history.</span></div><a href="#pipeline">Explore the pipeline →</a></div>
+      <div class="provenance-strip"><span class="provenance-icon"><span class="icon icon-circle-check" aria-hidden="true"></span></span><div><strong>Traceable by design</strong><span>Every reading links to an import. Every decision leaves a history.</span></div><a href="#pipeline">Explore the pipeline →</a></div>
     </section>
     <section id="view-investigations" class="view" hidden>
-      <div class="page-heading"><div><p class="eyebrow">FROM ALERT TO ACTION</p><h1>Investigation queue</h1><p class="subtitle">Understand each exception before deciding what comes next.</p></div><a class="button secondary" href="/api/export/cases.csv">↓ Export cases</a></div>
+      <div class="page-heading"><div><p class="eyebrow">FROM ALERT TO ACTION</p><h1>Investigation queue</h1><p class="subtitle">Understand each exception before deciding what comes next.</p></div><a class="button secondary" href="/api/export/cases.csv"><span class="icon icon-download" aria-hidden="true"></span>Export cases</a></div>
       <div class="filters"><label class="search-label"><span class="sr-only">Search investigations</span><input id="case-search" type="search" placeholder="Search meter, site or district…"></label><label>Status<select id="status-filter"><option value="active">Active cases</option><option value="all">All statuses</option><option value="open">Open</option><option value="investigating">Investigating</option><option value="resolved">Resolved</option><option value="dismissed">Dismissed</option></select></label><label>Exception<select id="kind-filter"><option value="all">All exception types</option><option value="sustained_usage">Sustained consumption</option><option value="meter_reset">Counter reset</option><option value="missing_reading">Missing reading</option><option value="billing_mismatch">Billing mismatch</option><option value="duplicate_reading">Duplicate reading</option></select></label><button id="clear-filters" class="button secondary" type="button">Clear filters</button></div>
       <article class="panel"><div class="panel-head"><h2 id="queue-label">Cases</h2><span class="muted">Select a case to inspect its evidence</span></div><p class="table-scroll-hint">Swipe sideways to see priority, status and review amount →</p><div id="case-table" class="table-scroll"></div></article>
     </section>
     <section id="view-pipeline" class="view" hidden>
-      <div class="page-heading"><div><p class="eyebrow">RELIABILITY YOU CAN INSPECT</p><h1>From source to signal.</h1><p class="subtitle">Validate, quarantine and preserve the origin of every reading.</p></div><button class="button primary import-demo">↻ <span>Run daily import</span></button></div>
+      <div class="page-heading"><div><p class="eyebrow">RELIABILITY YOU CAN INSPECT</p><h1>From source to signal.</h1><p class="subtitle">Validate, quarantine and preserve the origin of every reading.</p></div><button class="button primary import-demo"><span class="icon icon-refresh-cw" aria-hidden="true"></span><span>Run daily import</span></button></div>
       <div class="pipeline-steps"><div><b>01</b><h3>Receive</h3><p>CSV · UTF-8 · SHA-256</p></div><span>→</span><div><b>02</b><h3>Validate</h3><p>Schema · dates · meters</p></div><span>→</span><div><b>03</b><h3>Store</h3><p>Atomic batch · quarantine</p></div><span>→</span><div><b>04</b><h3>Investigate</h3><p>Rules · evidence · history</p></div></div>
       <div class="upload-grid"><article class="panel upload-panel"><h2>Import a readings file</h2><p>Use known meter IDs and cumulative counters in liters. Maximum 5 MB. Existing records are preserved.</p><form id="upload-form"><label>CSV file<input id="csv-file" type="file" accept=".csv,text/csv" required></label><label>Observation cutoff<input id="as-of" type="date" value="2026-08-30" required></label><button class="button primary" type="submit">Validate & import →</button><a href="/api/sample.csv">Download a valid sample</a></form></article><article class="panel contract-panel"><p class="eyebrow">THE DATA CONTRACT</p><h2>One meter. One date. One reading.</h2><code>meter_id,reading_date,counter_liters<br>M-0001,2026-08-30,543210</code><p>Duplicates, unknown meters and malformed values go into quarantine. A broken file structure rolls back the whole batch.</p><p class="muted">Replay the exact same file to verify idempotency. The original run is returned, with no new rows or cases.</p></article></div>
       <article class="panel"><div class="panel-head"><div><h2>Import history</h2><p>Click a run to inspect quarantined records</p></div></div><div id="runs-table" class="table-scroll"></div></article>
@@ -57,7 +57,7 @@
     <footer><span>AquaWatch <span class="muted">/</span> Built by Moundir Houazar</span><span>Independent portfolio project · No affiliation with a utility company</span></footer>
   </main>
 </div>
-<dialog id="case-dialog" aria-labelledby="case-title"><div class="dialog-top"><span class="eyebrow" id="case-meter">INVESTIGATION</span><button class="icon-button close-dialog" aria-label="Close investigation">×</button></div><div id="case-content"></div></dialog>
-<dialog id="run-dialog" aria-labelledby="run-title"><div class="dialog-top"><h2 id="run-title">Quarantined records</h2><button class="icon-button close-dialog" aria-label="Close import details">×</button></div><div id="run-content"></div></dialog>
+<dialog id="case-dialog" aria-labelledby="case-title"><div class="dialog-top"><span class="eyebrow" id="case-meter">INVESTIGATION</span><button class="icon-button close-dialog" aria-label="Close investigation"><span class="icon icon-x" aria-hidden="true"></span></button></div><div id="case-content"></div></dialog>
+<dialog id="run-dialog" aria-labelledby="run-title"><div class="dialog-top"><h2 id="run-title">Quarantined records</h2><button class="icon-button close-dialog" aria-label="Close import details"><span class="icon icon-x" aria-hidden="true"></span></button></div><div id="run-content"></div></dialog>
 <div id="toast" role="status" aria-live="polite" hidden></div>
 </body></html>

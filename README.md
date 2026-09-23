@@ -12,6 +12,8 @@ A data engineering and analytics portfolio project by **Moundir Houazar**, inspi
 
 The dashboard visual direction adapts the [MotionSites Forecast Center prompt](https://motionsites.ai/?prompt=forecast-center) to water-network operations. It uses an atmospheric utility header and restrained glass surfaces while keeping the charts and decisions tied to AquaWatch's actual synthetic data. Choose a 7, 30 or 90 day window, inspect a reading by pointer or keyboard, or select an exception type to open the filtered investigation queue. Animations respect reduced-motion preferences.
 
+The brand mark, favicon and interface icons use locally bundled [Lucide icons via Iconify](https://icon-sets.iconify.design/lucide/), so they render without a third-party runtime request. The [Lucide and Feather license notices](src/aquawatch/static/icons/LICENSE) are included with the assets.
+
 ## See the complete workflow
 
 1. Import a daily readings file.
