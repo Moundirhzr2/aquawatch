@@ -20,6 +20,8 @@ PostgreSQL demonstrates a conventional operational database. SQLite and DuckDB m
 
 A process lock serializes API writes, and conditional SQL updates protect case revisions. This is deliberately a single-operator demonstration, not a multi-tenant service. A session token and trusted-host checks protect local write endpoints against basic cross-origin browser abuse. They do not constitute authentication. A public deployment would require a different security and job-processing design.
 
+An ingestion run is claimed by the file hash. Completed claims replay, active claims report a conflict, and failed claims can retry because their data transaction rolled back. A one-hour stale threshold recovers abandoned claims after a crash. This is a bounded local reliability improvement; the ledger records the latest attempt per hash and concurrent imports from different files remain outside the single-writer design.
+
 ## Conservative rules before machine learning
 
 The consumption rule uses only earlier baseline values and requires a three-day run. It trades recall for explainability. Four subtle 1.5× events are missed, which the benchmark reports. A future model should improve a separately held-out evaluation, not merely add another library to the stack.

@@ -23,7 +23,15 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 from . import db
 from .detection import series
 from .evaluation import evaluate
-from .pipeline import MAX_BYTES, bootstrap, ingest, now, records
+from .pipeline import (
+    MAX_BYTES,
+    ImportInProgressError,
+    bootstrap,
+    ingest,
+    now,
+    records,
+    recover_stale_runs,
+)
 from .reconciliation import reconcile_invoice
 from .synthetic import AS_OF, generate
 
@@ -53,6 +61,7 @@ def create_app(engine=None, auto_seed=True):
     @asynccontextmanager
     async def lifespan(_app):
         db.metadata.create_all(engine)
+        recover_stale_runs(engine)
         if auto_seed:
             bootstrap(engine, fixture)
             ingest(engine, fixture["csv"], "synthetic-baseline.csv", AS_OF.isoformat())
@@ -283,6 +292,31 @@ def create_app(engine=None, auto_seed=True):
                 ).mappings()
             ]
 
+    @app.get("/api/ingestion/health")
+    def ingestion_health():
+        with engine.connect() as conn:
+            counts = {
+                status: conn.execute(
+                    select(func.count()).select_from(db.runs).where(db.runs.c.status == status)
+                ).scalar_one()
+                for status in ("completed", "failed", "running")
+            }
+            latest_completed = conn.execute(
+                select(func.max(db.runs.c.finished_at)).where(db.runs.c.status == "completed")
+            ).scalar_one_or_none()
+            latest_reading = conn.execute(
+                select(func.max(db.readings.c.reading_date))
+            ).scalar_one_or_none()
+        return {
+            "run_counts": counts,
+            "latest_completed_at": latest_completed,
+            "latest_reading_date": latest_reading,
+            "reading_age_days": (date.today() - date.fromisoformat(latest_reading)).days
+            if latest_reading
+            else None,
+            "data_kind": "synthetic_demo",
+        }
+
     @app.get("/api/runs/{run_id}/rejections")
     def rejected_rows(run_id: str):
         with engine.connect() as conn:
@@ -295,13 +329,16 @@ def create_app(engine=None, auto_seed=True):
 
     @app.post("/api/import/demo")
     def daily_import():
-        with lock:
-            result = ingest(
-                engine,
-                fixture["daily_csv"],
-                "synthetic-daily.csv",
-                (AS_OF + timedelta(days=1)).isoformat(),
-            )
+        try:
+            with lock:
+                result = ingest(
+                    engine,
+                    fixture["daily_csv"],
+                    "synthetic-daily.csv",
+                    (AS_OF + timedelta(days=1)).isoformat(),
+                )
+        except ImportInProgressError as exc:
+            raise HTTPException(409, str(exc)) from exc
         return result
 
     @app.post("/api/import")
@@ -318,6 +355,8 @@ def create_app(engine=None, auto_seed=True):
                 return ingest(
                     engine, content, Path(file.filename or "upload.csv").name, as_of.isoformat()
                 )
+        except ImportInProgressError as exc:
+            raise HTTPException(409, str(exc)) from exc
         except ValueError as exc:
             raise HTTPException(422, str(exc)) from exc
 

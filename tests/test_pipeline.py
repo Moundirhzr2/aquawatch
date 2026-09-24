@@ -1,5 +1,7 @@
 import csv
+import hashlib
 import io
+from datetime import datetime, timedelta, timezone
 
 import pytest
 from sqlalchemy import func, select, update
@@ -7,7 +9,7 @@ from sqlalchemy import func, select, update
 from aquawatch import db
 from aquawatch.detection import detect, series
 from aquawatch.evaluation import evaluate
-from aquawatch.pipeline import bootstrap, ingest, records
+from aquawatch.pipeline import ImportInProgressError, bootstrap, ingest, records, recover_stale_runs
 from aquawatch.reconciliation import reconcile_invoice
 from aquawatch.synthetic import AS_OF, csv_bytes, generate, invoice_amount
 
@@ -46,6 +48,80 @@ def test_bad_header_leaves_failed_ledger_without_readings(seeded):
         run = records(conn, db.runs)[0]
         assert run["status"] == "failed"
         assert run["accepted"] == 0
+
+
+def test_failed_batch_can_retry_same_hash_without_duplicate_readings(seeded, monkeypatch):
+    engine, _ = seeded
+    content = csv_bytes([dict(meter_id="M-0001", reading_date="2026-08-29", counter_liters="123")])
+    from aquawatch import pipeline
+
+    original = pipeline.detect
+    calls = 0
+
+    def fail_once(*args):
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            raise RuntimeError("simulated worker failure")
+        return original(*args)
+
+    monkeypatch.setattr(pipeline, "detect", fail_once)
+    with pytest.raises(ValueError, match="Database transaction failed"):
+        ingest(engine, content, "retry.csv", AS_OF.isoformat())
+    assert count(engine, db.readings) == 0
+    with engine.connect() as conn:
+        failed_id = records(conn, db.runs)[0]["id"]
+    result = ingest(engine, content, "retry.csv", AS_OF.isoformat())
+    assert result["id"] == failed_id
+    assert result["status"] == "completed" and not result["replayed"]
+    assert count(engine, db.readings) == 1
+    assert count(engine, db.runs) == 1
+
+
+def test_stale_running_batch_is_recovered_and_retried(seeded):
+    engine, _ = seeded
+    content = csv_bytes([dict(meter_id="M-0001", reading_date="2026-08-29", counter_liters="123")])
+    run_id = "interrupted-run"
+    with engine.begin() as conn:
+        conn.execute(
+            db.runs.insert().values(
+                id=run_id,
+                file_name="before.csv",
+                sha256=hashlib.sha256(content).hexdigest(),
+                started_at=(datetime.now(timezone.utc) - timedelta(hours=2)).isoformat(),
+                status="running",
+                accepted=0,
+                rejected=0,
+                duplicates=0,
+            )
+        )
+    assert recover_stale_runs(engine) == 1
+    with engine.connect() as conn:
+        assert records(conn, db.runs)[0]["status"] == "failed"
+    result = ingest(engine, content, "after.csv", AS_OF.isoformat())
+    assert result["id"] == run_id and result["accepted"] == 1
+    assert count(engine, db.readings) == 1
+
+
+def test_active_running_hash_is_not_reported_as_replay(seeded):
+    engine, _ = seeded
+    content = csv_bytes([dict(meter_id="M-0001", reading_date="2026-08-29", counter_liters="123")])
+    with engine.begin() as conn:
+        conn.execute(
+            db.runs.insert().values(
+                id="active-run",
+                file_name="active.csv",
+                sha256=hashlib.sha256(content).hexdigest(),
+                started_at=datetime.now(timezone.utc).isoformat(),
+                status="running",
+                accepted=0,
+                rejected=0,
+                duplicates=0,
+            )
+        )
+    with pytest.raises(ImportInProgressError, match="already being imported"):
+        ingest(engine, content, "active.csv", AS_OF.isoformat())
+    assert count(engine, db.readings) == 0
 
 
 def test_structural_csv_failure_rolls_back_valid_prefix(seeded):

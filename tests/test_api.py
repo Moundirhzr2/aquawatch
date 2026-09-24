@@ -1,8 +1,11 @@
+import hashlib
 from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime, timezone
 
 import pytest
 from fastapi.testclient import TestClient
 
+from aquawatch import db
 from aquawatch.api import create_app
 
 
@@ -23,6 +26,10 @@ def test_dashboard_and_static_assets(client):
     assert data["active_cases"] == 27
     assert data["review_amount_cents"] == 25500
     assert len(data["daily"]) == 90
+    ingestion = client.get("/api/ingestion/health").json()
+    assert ingestion["run_counts"] == {"completed": 1, "failed": 0, "running": 0}
+    assert ingestion["latest_reading_date"] == "2026-08-29"
+    assert ingestion["data_kind"] == "synthetic_demo"
 
 
 def test_filter_and_search(client):
@@ -131,6 +138,7 @@ def test_upload_failure_ledger_and_replay(client):
     )
     assert bad.status_code == 422
     assert client.get("/api/runs").json()[0]["status"] == "failed"
+    assert client.get("/api/ingestion/health").json()["run_counts"]["failed"] == 1
     sample = client.get("/api/sample.csv").content
     first = client.post(
         "/api/import?as_of=2026-08-30", files={"file": ("daily.csv", sample, "text/csv")}
@@ -146,6 +154,28 @@ def test_upload_failure_ledger_and_replay(client):
         ).status_code
         == 422
     )
+
+
+def test_upload_active_file_returns_conflict(client):
+    sample = client.get("/api/sample.csv").content
+    with client.app.state.engine.begin() as conn:
+        conn.execute(
+            db.runs.insert().values(
+                id="other-writer",
+                file_name="daily.csv",
+                sha256=hashlib.sha256(sample).hexdigest(),
+                started_at=datetime.now(timezone.utc).isoformat(),
+                status="running",
+                accepted=0,
+                rejected=0,
+                duplicates=0,
+            )
+        )
+    response = client.post(
+        "/api/import?as_of=2026-08-30", files={"file": ("daily.csv", sample, "text/csv")}
+    )
+    assert response.status_code == 409
+    assert client.get("/api/ingestion/health").json()["run_counts"]["running"] == 1
 
 
 def test_csv_export_and_benchmark(client):
