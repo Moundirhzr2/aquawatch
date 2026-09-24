@@ -5,10 +5,11 @@ from __future__ import annotations
 import csv
 import hashlib
 import io
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from uuid import uuid4
 
 from sqlalchemy import select, update
+from sqlalchemy.exc import IntegrityError
 
 from . import db
 from .detection import case, detect
@@ -17,6 +18,11 @@ from .synthetic import DEMO_VOLUME_ERRORS, invoice_amount
 MAX_BYTES = 5 * 1024 * 1024
 MAX_ROWS = 100_000
 FIELDS = ["meter_id", "reading_date", "counter_liters"]
+STALE_RUN_AFTER = timedelta(hours=1)
+
+
+class ImportInProgressError(ValueError):
+    """The same file is already being processed by another writer."""
 
 
 def now():
@@ -45,28 +51,84 @@ def save_cases(conn, candidates):
     return added
 
 
+def recover_stale_runs(engine, at=None):
+    """Mark abandoned claims failed so their atomic batches can be retried."""
+    at = at or datetime.now(timezone.utc)
+    cutoff = (at - STALE_RUN_AFTER).isoformat()
+    with engine.begin() as conn:
+        result = conn.execute(
+            update(db.runs)
+            .where(db.runs.c.status == "running", db.runs.c.started_at < cutoff)
+            .values(
+                status="failed",
+                error="Import interrupted or timed out; the batch was rolled back and can be retried.",
+                finished_at=at.isoformat(),
+            )
+        )
+    return result.rowcount
+
+
+def claim_run(engine, digest, filename):
+    """Atomically claim a new or failed hash; only completed hashes are replays."""
+    for _ in range(3):
+        recover_stale_runs(engine)
+        run = dict(
+            id=str(uuid4()),
+            file_name=filename[:160],
+            sha256=digest,
+            started_at=now(),
+            status="running",
+            accepted=0,
+            rejected=0,
+            duplicates=0,
+        )
+        try:
+            with engine.begin() as conn:
+                prior = (
+                    conn.execute(select(db.runs).where(db.runs.c.sha256 == digest))
+                    .mappings()
+                    .first()
+                )
+                if prior is None:
+                    conn.execute(db.runs.insert().values(**run))
+                    return run, None
+                if prior["status"] == "completed":
+                    return None, {**prior, "replayed": True, "cases_added": 0}
+                if prior["status"] == "running":
+                    raise ImportInProgressError(
+                        "This file is already being imported. Try again later."
+                    )
+                result = conn.execute(
+                    update(db.runs)
+                    .where(db.runs.c.id == prior["id"], db.runs.c.status == "failed")
+                    .values(
+                        file_name=run["file_name"],
+                        started_at=run["started_at"],
+                        finished_at=None,
+                        status="running",
+                        accepted=0,
+                        rejected=0,
+                        duplicates=0,
+                        error=None,
+                    )
+                )
+                if result.rowcount == 1:
+                    return {**run, "id": prior["id"]}, None
+        except IntegrityError:
+            # Another writer inserted the same digest after our SELECT.
+            continue
+    raise ImportInProgressError("Could not claim this file after concurrent imports.")
+
+
 def ingest(engine, content: bytes, filename: str, as_of: str) -> dict:
     if len(content) > MAX_BYTES:
         raise ValueError("CSV exceeds the 5 MB limit.")
     date.fromisoformat(as_of)
     digest = hashlib.sha256(content).hexdigest()
-    with engine.connect() as conn:
-        prior = conn.execute(select(db.runs).where(db.runs.c.sha256 == digest)).mappings().first()
-        if prior:
-            return {**prior, "replayed": True, "cases_added": 0}
-    run_id = str(uuid4())
-    run = dict(
-        id=run_id,
-        file_name=filename[:160],
-        sha256=digest,
-        started_at=now(),
-        status="running",
-        accepted=0,
-        rejected=0,
-        duplicates=0,
-    )
-    with engine.begin() as conn:
-        conn.execute(db.runs.insert().values(**run))
+    run, replay = claim_run(engine, digest, filename)
+    if replay is not None:
+        return replay
+    run_id = run["id"]
     try:
         decoded = content.decode("utf-8-sig")
         reader = csv.DictReader(io.StringIO(decoded, newline=""), strict=True)

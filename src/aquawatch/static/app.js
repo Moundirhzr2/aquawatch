@@ -103,7 +103,9 @@ async function loadQueue() {
   $("#case-table").innerHTML=casesTable(rows);$("#queue-label").textContent=`${rows.length} investigation${rows.length===1?"":"s"}`;
 }
 async function loadRuns() {
-  const rows=await api("/api/runs");
+  const [rows,health]=await Promise.all([api("/api/runs"),api("/api/ingestion/health")]);
+  const counts=health.run_counts;
+  $("#ingestion-health").textContent=`${counts.completed} completed · ${counts.failed} failed · ${counts.running} running. Latest reading: ${health.latest_reading_date||"none"} (historical synthetic sample). Last successful import: ${health.latest_completed_at?new Date(health.latest_completed_at).toLocaleString("en-GB"):"none"}.`;
   $("#runs-table").innerHTML=rows.length?`<table><thead><tr><th>Source file</th><th>Status</th><th>Accepted</th><th>Quarantined</th><th>Duplicates</th><th>Imported</th></tr></thead><tbody>${rows.map(r=>`<tr><td><button class="row-button" data-run="${esc(r.id)}">${esc(r.file_name)}</button><small class="mono">SHA-256 ${esc(r.sha256.slice(0,16))}…</small>${r.error?`<small>${esc(r.error)}</small>`:""}</td><td>${badge(r.status)}</td><td>${number(r.accepted)}</td><td>${number(r.rejected)}</td><td>${number(r.duplicates)}</td><td>${esc(new Date(r.started_at).toLocaleString("en-GB"))}</td></tr>`).join("")}</tbody></table>`:'<p class="empty">No import history yet.</p>';
 }
 async function loadEvaluation() {

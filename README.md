@@ -22,7 +22,9 @@ The brand mark, favicon and interface icons use locally bundled [Lucide icons vi
 4. Open a case, inspect its evidence and record an investigation decision.
 5. Transform operational data with dbt and analyze the resulting marts in Power BI.
 
-An exact file replay does not duplicate readings, runs or cases. Human case decisions survive pipeline reruns. Missing days and meter resets produce **null daily consumption**, not invented usage.
+A completed file replay does not duplicate readings, runs or cases. Human case decisions survive pipeline reruns. Missing days and meter resets produce **null daily consumption**, not invented usage.
+
+Imports now distinguish completed replays from failed and in-progress files. An interrupted run older than one hour is marked failed and its rolled-back batch can be retried with the same file. The pipeline page and `/api/ingestion/health` show run states and the latest reading date. See the [data contract](docs/data-contract.md) for the single-writer boundary.
 
 The [invoice reconciliation walkthrough](docs/invoice-reconciliation.md) shows the new distinction between tariff arithmetic, measured volume differences and unverified periods; see the [investigation screenshot](docs/images/reconciliation.png).
 

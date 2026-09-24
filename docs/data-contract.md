@@ -26,11 +26,14 @@ The web upload cutoff cannot precede the latest stored reading. The demo baselin
 | Same meter/date, different counter | Incoming conflict quarantined; original preserved |
 | Unknown meter, invalid date, invalid counter, wrong row width | Row quarantined with reason and payload |
 | Invalid header, invalid UTF-8, malformed CSV quoting, empty file, too many rows | Batch rolled back; failed run retained |
-| Same file bytes, even under another filename | Original run returned; no new rows or cases |
+| Same bytes as a completed file, even under another filename | Original run returned; no new rows or cases |
+| Same bytes as a failed file | Retry the atomic batch using its ledger ID |
+| Same bytes as an active file | HTTP 409 for API upload; no misleading replay result |
+| Running for more than one hour | Mark failed on startup or the next import, then allow retry |
 
 Rejected count includes duplicate count. Acceptance rate = accepted / (accepted + rejected), across completed imports. Failed-file rows never enter that denominator.
 
-The ledger is inserted before processing and completed afterward. A process crash can leave a `running` entry; automatic crash recovery is not implemented. Exact replays of failed or running hashes return their recorded state rather than retrying. Correct the file for a new hash or investigate the ledger through controlled maintenance. The demo runs one ingestion writer at a time; do not run simultaneous CLI imports and API imports.
+The ledger is inserted before processing and completed in the same transaction as the readings, rejections and cases. A crash during that transaction rolls the batch back. Runs left `running` for over one hour are marked `failed` on API startup or the next import; retrying the same hash reuses its ledger ID. A successfully committed batch always replays without mutation. The ledger shows the latest attempt for each hash, so a failed attempt's prior error is replaced when retried. The `/api/ingestion/health` endpoint and pipeline page expose completed, failed and running counts, last successful import and latest reading date. Data age is reported as a fact about the **historical synthetic fixture**, not as a live utility-service SLA. The demo still assumes one ingestion writer across the API and CLI; file-level hash claims do not replace per-source orchestration.
 
 ## Reference entities
 
