@@ -20,10 +20,16 @@ from .detection import detect, series
 MAX_UNCOMPRESSED_BYTES = 32 * 1024 * 1024
 MAX_OBSERVATIONS = 500_000
 EXPECTED_COLUMNS = ["time", "unixtime", "total_m3"]
+DATA_DIRECTORY = Path(__file__).resolve().parents[2] / "runtime" / "external"
+HOUSEHOLD_ARCHIVES = {
+    "hh-04": DATA_DIRECTORY / "hh-04.zip",
+    "hh-14": DATA_DIRECTORY / "hh-14.zip",
+}
 
 
-def evaluate_household(archive: Path) -> dict:
+def evaluate_household(household: str) -> dict:
     """Assess data compatibility and rule burden; no ground-truth scores."""
+    archive = HOUSEHOLD_ARCHIVES[household]
     digest = hashlib.sha256(archive.read_bytes()).hexdigest()
     with ZipFile(archive) as bundle:
         matches = [
@@ -128,14 +134,10 @@ def main() -> None:
     import argparse
 
     parser = argparse.ArgumentParser(description="Evaluate external household water readings")
-    parser.add_argument("archive", type=Path, help="Downloaded Zenodo hh-NN.zip archive")
-    parser.add_argument("--output", type=Path, help="Optional JSON summary path")
+    parser.add_argument("household", choices=sorted(HOUSEHOLD_ARCHIVES))
     args = parser.parse_args()
-    result = evaluate_household(args.archive)
+    result = evaluate_household(args.household)
     report = json.dumps(result, indent=2) + "\n"
-    if args.output:
-        args.output.parent.mkdir(parents=True, exist_ok=True)
-        args.output.write_text(report, encoding="utf-8")
     print(report, end="")
 
 

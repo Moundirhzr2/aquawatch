@@ -5,7 +5,7 @@ from zipfile import ZipFile
 
 import pytest
 
-from aquawatch.external_water import evaluate_household
+from aquawatch import external_water
 
 
 def archive_with_rows(tmp_path, rows, name="hh-04/smartmeter.csv"):
@@ -20,7 +20,7 @@ def archive_with_rows(tmp_path, rows, name="hh-04/smartmeter.csv"):
     return archive
 
 
-def test_external_summary_excludes_unlabeled_performance_claims(tmp_path):
+def test_external_summary_excludes_unlabeled_performance_claims(tmp_path, monkeypatch):
     archive = archive_with_rows(
         tmp_path,
         [
@@ -31,7 +31,8 @@ def test_external_summary_excludes_unlabeled_performance_claims(tmp_path):
             ("2022-01-05 23:00:00+00:00", 1641423600, "not-a-number"),
         ],
     )
-    result = evaluate_household(archive)
+    monkeypatch.setitem(external_water.HOUSEHOLD_ARCHIVES, "hh-04", archive)
+    result = external_water.evaluate_household("hh-04")
     assert result["source_rows"] == 5
     assert result["valid_rows"] == 3
     assert result["duplicate_timestamps"] == 1
@@ -43,7 +44,13 @@ def test_external_summary_excludes_unlabeled_performance_claims(tmp_path):
     assert "1.300" not in str(result)
 
 
-def test_rejects_archive_with_unexpected_layout(tmp_path):
+def test_rejects_archive_with_unexpected_layout(tmp_path, monkeypatch):
     archive = archive_with_rows(tmp_path, [], name="other/smartmeter.csv")
+    monkeypatch.setitem(external_water.HOUSEHOLD_ARCHIVES, "hh-04", archive)
     with pytest.raises(ValueError, match="layout"):
-        evaluate_household(archive)
+        external_water.evaluate_household("hh-04")
+
+
+def test_rejects_unlisted_household():
+    with pytest.raises(KeyError):
+        external_water.evaluate_household("../../private")

@@ -14,8 +14,8 @@ The sampled households have sparse coverage across their full date spans. A miss
 The reproducible summaries, including SHA-256 values for the two input archives, are in [external-water-validation.json](external-water-validation.json). To rerun, download `hh-04.zip` and `hh-14.zip` from the Zenodo record into ignored `runtime/external/`, then run:
 
 ```powershell
-python -m aquawatch.external_water runtime/external/hh-04.zip
-python -m aquawatch.external_water runtime/external/hh-14.zip
+python -m aquawatch.external_water hh-04
+python -m aquawatch.external_water hh-14
 ```
 
 No raw household readings are stored in this repository. A true field-performance evaluation would require permissioned incident labels aligned to meters and time windows, together with an agreed matching tolerance, coverage threshold and investigation outcome. Until then, the synthetic precision and recall figures must remain explicitly separate from this external compatibility check.
