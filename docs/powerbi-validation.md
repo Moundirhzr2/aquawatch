@@ -1,6 +1,6 @@
 # Power BI validation
 
-**23 September update:** The current source has four pages and 18 measures after adding invoice-volume reconciliation. The earlier Desktop evidence below applies to the three-page, 14-measure version only. The new dbt mart, Python/SQL invoice-by-invoice parity and PBIP repository checks pass; a fresh native Desktop refresh and visual check of the fourth page are still required. The current CSV snapshot has 27 active cases, EUR 14,155.84 billed, EUR 13,900.84 expected, two volume mismatches, eight unverified periods and 20.0 m³ of volume to review.
+**24 September update:** The current four-page source has 18 measures after adding invoice-volume reconciliation. A fresh native Power Query refresh and DAX/CSV parity check passed for all 18 measures, seven tables, four districts and 90 dates using the Power BI Desktop Store engine. The checked-in [current validation record](powerbi-validation-2026-09-24.json) includes the CSV hashes and exact results. The model was loaded into an isolated temporary database; this does **not** prove that the PBIP file opens or that the fourth page renders correctly. The earlier screenshots below apply to the three-page version only. The current CSV snapshot has 27 active cases, EUR 14,155.84 billed, EUR 13,900.84 expected, two volume mismatches, eight unverified periods and 20.0 m³ of volume to review.
 
 The source semantic model passed a native Power Query refresh and DAX execution check on 2026-09-13 using the local Analysis Services engine shipped with Power BI Desktop. All 14 measures, seven table counts, four district groups and 90 date groups matched independently calculated CSV results. The grouped queries exercise all seven model relationships.
 
@@ -18,7 +18,7 @@ The generator supplies the required card instance selectors, removes internal ca
 
 ## Reproduce the native check
 
-Requires Windows, Power BI Desktop, PowerShell 7.4 or newer, and Python. Open an isolated copy of `AquaWatch.pbip` in Desktop first. From the repository root:
+Requires Windows, Power BI Desktop, PowerShell 7.4 or newer, and Python. For the default process-path check, open an isolated copy of `AquaWatch.pbip` in Desktop first. The Store-edition mode needs one running Desktop engine but cannot establish that the PBIP opened. From the repository root:
 
 ```powershell
 pwsh -NoProfile -File scripts/check_powerbi_engine.ps1 -ReportPath "C:/absolute/path/to/AquaWatch.pbip" -DownloadClient
@@ -27,9 +27,9 @@ python scripts/check_powerbi_results.py
 
 `-DownloadClient` downloads Microsoft's two NuGet packages, `Microsoft.AnalysisServices` and `Microsoft.AnalysisServices.AdomdClient`, pinned to 19.117.0. They are stored under ignored `runtime/powerbi-client`. Existing libraries can instead be supplied with `-ClientDirectory`. No cloud account or Power BI service connection is used.
 
-The script identifies the selected Desktop process by its exact report path, finds its child model engine and connects only to that engine's localhost port. Results are written to ignored `runtime/powerbi-validation`. The Python check compares those results with the seven CSVs, including counts and filter behavior. Run both commands; successful query execution alone does not establish numerical parity.
+The script normally identifies the selected Desktop process by its exact report path. Microsoft Store editions may omit that path from their process command line. With exactly one Desktop process running, add `-UseAnyDesktopEngine` to run the same isolated source-model test on its engine. This mode validates native Power Query and DAX, but explicitly does not verify PBIP opening. Results are written to ignored `runtime/powerbi-validation`. The Python check compares those results with the seven CSVs, including counts and filter behavior. Run both commands; successful query execution alone does not establish numerical parity.
 
-The checked-in [validation summary](powerbi-validation.json) records the earlier tested engine version, results and SHA-256 hashes of its input CSV snapshot. It is a historical record, not validation of the current volume page or CSV snapshot. Regenerating the marts changes the snapshot and requires a new validation run. The live web application may contain later imports or investigation decisions.
+The earlier [validation summary](powerbi-validation.json) records the three-page model. The [24 September summary](powerbi-validation-2026-09-24.json) records the current model and input CSV hashes. Regenerating the marts changes the snapshot and requires a new validation run. The live web application may contain later imports or investigation decisions.
 
 ## Remaining visual check
 

@@ -9,6 +9,7 @@ param(
     [Parameter(Mandatory)][string]$ReportPath,
     [string]$ClientDirectory = (Join-Path $PSScriptRoot '../runtime/powerbi-client'),
     [switch]$DownloadClient,
+    [switch]$UseAnyDesktopEngine,
     [string]$ResultsDirectory = (Join-Path $PSScriptRoot '../runtime/powerbi-validation')
 )
 $ErrorActionPreference = 'Stop'
@@ -17,10 +18,18 @@ $resolvedReport = (Resolve-Path -LiteralPath $ReportPath).Path
 if ([IO.Path]::GetFileName($resolvedReport) -ne 'AquaWatch.pbip') {
     throw 'Select an open AquaWatch.pbip report, preferably an isolated copy.'
 }
-$report = @(Get-CimInstance Win32_Process -Filter "Name='PBIDesktop.exe'" | Where-Object {
-    $_.CommandLine -and $_.CommandLine.Contains('"' + $resolvedReport + '"')
-})
-if ($report.Count -ne 1) { throw 'Open the selected AquaWatch.pbip in Desktop first; expected exactly one matching process.' }
+$desktopProcesses = @(Get-CimInstance Win32_Process -Filter "Name='PBIDesktop.exe'")
+if ($UseAnyDesktopEngine) {
+    # Store editions omit the opened PBIP path from their process command line.
+    # This mode validates the source model on the sole running Desktop engine;
+    # it does not prove that Desktop opened or rendered the selected report.
+    $report = $desktopProcesses
+} else {
+    $report = @($desktopProcesses | Where-Object {
+        $_.CommandLine -and $_.CommandLine.Contains('"' + $resolvedReport + '"')
+    })
+}
+if ($report.Count -ne 1) { throw 'Expected exactly one suitable Power BI Desktop process. For the Store edition, close other Desktop windows and pass -UseAnyDesktopEngine.' }
 $engine = @(Get-CimInstance Win32_Process -Filter "Name='msmdsrv.exe'" | Where-Object ParentProcessId -eq $report[0].ProcessId)
 if ($engine.Count -ne 1) { throw 'Expected exactly one model engine for the selected report.' }
 $ports = @(Get-NetTCPConnection -State Listen | Where-Object OwningProcess -eq $engine[0].ProcessId | Select-Object -ExpandProperty LocalPort -Unique)
