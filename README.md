@@ -76,7 +76,7 @@ The analytics command exports the operational tables, runs **dbt build**, genera
 
 The checked-in report is portable source. Its `DataFolder` parameter defaults to `C:/AquaWatch/powerbi/data`; the command above sets the path on your computer. See [Power BI setup](powerbi/README.md) and [metric definitions](docs/metric-definitions.md).
 
-The previous three-page model passed native Power Query refresh and DAX validation for its 14 measures, seven tables, four districts and 90 dates. The fourth page and four new measures are generated and covered by mart tests and Python/SQL parity, but require a fresh Power BI Desktop refresh for native confirmation. See [Power BI validation](docs/powerbi-validation.md) for the repeatable engine check and earlier evidence.
+The current four-page model passed a native Power Query refresh and DAX/CSV parity check for all 18 measures, seven tables, four districts and 90 dates. The fourth page still needs a visual Desktop check; native model validation alone does not establish that the PBIP opens or renders. See [Power BI validation](docs/powerbi-validation.md) for the repeatable check and its exact scope.
 
 ## Architecture
 
@@ -101,7 +101,7 @@ flowchart LR
 | Rules and API | Python, FastAPI, Pydantic | Explainable detection, input contracts, optimistic concurrency |
 | Interface | HTML, CSS, JavaScript | Responsive investigation and import workflow |
 | Analytics | SQL, dbt, PostgreSQL / DuckDB | Tested dimensions and fact tables |
-| Business intelligence | Power BI, Power Query M, DAX | Three report pages and reusable measures |
+| Business intelligence | Power BI, Power Query M, DAX | Four report pages and reusable measures |
 | Reproducibility | Docker Compose, pytest, Playwright, GitHub Actions | Setup, integration checks and browser regression |
 
 ## Measured synthetic benchmark
@@ -113,6 +113,10 @@ aquawatch benchmark
 ```
 
 Results for seeds 42, 71 and 103, including timing and missed events, are saved in [docs/benchmark.json](docs/benchmark.json). Seeds vary consumption but share event templates, so they are **not independent external validation**. See [the case study](docs/case-study.md).
+
+## Independent water-reading check
+
+A read-only adapter also processed **573,605 real timestamped readings from two households** in the [Wilhelm et al. water-meter dataset](https://doi.org/10.5281/zenodo.7506076). Their daily coverage across the full date span is only 17.82% and 21.26%, respectively, and AquaWatch reported 16 and 4 missing-reading gap episodes. The dataset has no compatible incident labels or invoices, so this is a compatibility and data-quality check, **not** external precision/recall or billing validation. See the [method, limitations and reproducible results](docs/external-water-validation.md). Raw household readings are not redistributed in this repository.
 
 ## Checks
 

@@ -1,0 +1,72 @@
+{
+  "evaluated_on": "2026-09-24",
+  "source": "https://doi.org/10.5281/zenodo.7506076",
+  "license": "CC BY 4.0",
+  "interpretation": "External unlabeled compatibility and rule burden; no field precision or recall",
+  "households": [
+    {
+      "source": "https://doi.org/10.5281/zenodo.7506076",
+      "archive_sha256": "ab8aba7889182277c0c27215937150530a7a3356fc0b2bc977d35ed4ae85c74c",
+      "household": "hh-04",
+      "timezone": "UTC",
+      "aggregation": "Last valid cumulative observation per UTC day; m3 rounded to integer liters",
+      "source_rows": 145515,
+      "valid_rows": 145515,
+      "invalid_rows": 0,
+      "duplicate_timestamps": 0,
+      "first_day": "2021-03-11",
+      "last_day": "2022-08-25",
+      "daily_observations": 95,
+      "calendar_days": 533,
+      "daily_coverage": 0.1782,
+      "valid_daily_intervals": 78,
+      "unusable_daily_intervals": 17,
+      "rule_flags_by_kind": {
+        "missing_reading": 16
+      },
+      "rule_flags_total": 16,
+      "evaluation_scope": "Unlabeled external data compatibility and rule burden only",
+      "precision": null,
+      "recall": null,
+      "limitations": [
+        "The source has no matching leak, reset or missing-reading ground-truth labels.",
+        "A rule flag is a review candidate, not a confirmed incident or false positive.",
+        "Daily last-observation aggregation differs from a utility's daily closing read.",
+        "No external invoices or tariffs are available for billing evaluation.",
+        "One household cannot establish field performance or population generalization."
+      ]
+    },
+    {
+      "source": "https://doi.org/10.5281/zenodo.7506076",
+      "archive_sha256": "0cb52499a072518928008c0083fc283c02afee69d68b4efdb17870636a3da20a",
+      "household": "hh-14",
+      "timezone": "UTC",
+      "aggregation": "Last valid cumulative observation per UTC day; m3 rounded to integer liters",
+      "source_rows": 428090,
+      "valid_rows": 428090,
+      "invalid_rows": 0,
+      "duplicate_timestamps": 0,
+      "first_day": "2021-03-02",
+      "last_day": "2022-08-05",
+      "daily_observations": 111,
+      "calendar_days": 522,
+      "daily_coverage": 0.2126,
+      "valid_daily_intervals": 106,
+      "unusable_daily_intervals": 5,
+      "rule_flags_by_kind": {
+        "missing_reading": 4
+      },
+      "rule_flags_total": 4,
+      "evaluation_scope": "Unlabeled external data compatibility and rule burden only",
+      "precision": null,
+      "recall": null,
+      "limitations": [
+        "The source has no matching leak, reset or missing-reading ground-truth labels.",
+        "A rule flag is a review candidate, not a confirmed incident or false positive.",
+        "Daily last-observation aggregation differs from a utility's daily closing read.",
+        "No external invoices or tariffs are available for billing evaluation.",
+        "One household cannot establish field performance or population generalization."
+      ]
+    }
+  ]
+}
