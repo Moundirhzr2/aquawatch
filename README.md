@@ -76,7 +76,7 @@ The analytics command exports the operational tables, runs **dbt build**, genera
 
 The checked-in report is portable source. Its `DataFolder` parameter defaults to `C:/AquaWatch/powerbi/data`; the command above sets the path on your computer. See [Power BI setup](powerbi/README.md) and [metric definitions](docs/metric-definitions.md).
 
-The current four-page model passed a native Power Query refresh and DAX/CSV parity check for all 18 measures, seven tables, four districts and 90 dates. The fourth page still needs a visual Desktop check; native model validation alone does not establish that the PBIP opens or renders. See [Power BI validation](docs/powerbi-validation.md) for the repeatable check and its exact scope.
+The current four-page model passed a native Power Query refresh and DAX/CSV parity check for all 18 measures, seven tables, four districts and 90 dates. A user-provided screenshot also confirms the populated fourth page and its four expected totals. Earlier screenshots confirm the first three pages. See [Power BI validation](docs/powerbi-validation.md) for the evidence and the limits of these checks.
 
 ## Architecture
 

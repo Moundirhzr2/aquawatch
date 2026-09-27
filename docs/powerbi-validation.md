@@ -1,5 +1,7 @@
 # Power BI validation
 
+**27 September visual confirmation:** A user-provided [Volume reconciliation screenshot](images/powerbi-volume-reconciliation.png) confirms that the fourth page renders with 112 comparable invoices, two volume mismatches, eight unverified invoices and 20.0 m³ to review. The district chart and invoice table are populated; reset periods show `counter_reset` with blank measured volume and difference, rather than invented consumption. The explanatory note is readable. This closes the pending fourth-page render check. The screenshot is cropped at the right edge and does not demonstrate district selection or every table row; exhaustive interaction testing is not claimed. Native refresh and exact model parity are established separately by the 24 September record below.
+
 **24 September update:** The current four-page source has 18 measures after adding invoice-volume reconciliation. A fresh native Power Query refresh and DAX/CSV parity check passed for all 18 measures, seven tables, four districts and 90 dates using the Power BI Desktop Store engine. The checked-in [current validation record](powerbi-validation-2026-09-24.json) includes the CSV hashes and exact results. The model was loaded into an isolated temporary database; this does **not** prove that the PBIP file opens or that the fourth page renders correctly. The earlier screenshots below apply to the three-page version only. The current CSV snapshot has 27 active cases, EUR 14,155.84 billed, EUR 13,900.84 expected, two volume mismatches, eight unverified periods and 20.0 m³ of volume to review.
 
 The source semantic model passed a native Power Query refresh and DAX execution check on 2026-09-13 using the local Analysis Services engine shipped with Power BI Desktop. All 14 measures, seven table counts, four district groups and 90 date groups matched independently calculated CSV results. The grouped queries exercise all seven model relationships.
@@ -31,7 +33,7 @@ The script normally identifies the selected Desktop process by its exact report 
 
 The earlier [validation summary](powerbi-validation.json) records the three-page model. The [24 September summary](powerbi-validation-2026-09-24.json) records the current model and input CSV hashes. Regenerating the marts changes the snapshot and requires a new validation run. The live web application may contain later imports or investigation decisions.
 
-## Remaining visual check
+## Reproduce the visual check
 
 Use the [Power BI setup](../powerbi/README.md) to set the CSV folder, open the PBIP and refresh it. For the checked-in snapshot, inspect these unfiltered values:
 
