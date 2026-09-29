@@ -145,7 +145,7 @@ tests/             behavioral tests and browser regression
 dbt/               staging, marts, tests, source contracts and profiles
 powerbi/           editable PBIP report, semantic model, theme and mart CSVs
 scripts/           local setup and report generator
-docs/              architecture, benchmark, decisions and interview walkthrough
+docs/              architecture, benchmark, decisions and validation evidence
 .github/workflows/ continuous integration
 ```
 
@@ -160,9 +160,5 @@ docs/              architecture, benchmark, decisions and interview walkthrough
 - Detection currently re-evaluates stored observations after each batch. It is transparent and sufficient for this dataset, but is not an internet-scale streaming design.
 
 See [security and deployment boundaries](SECURITY.md), [design decisions](docs/decisions.md), [data contract](docs/data-contract.md), and [references](docs/references.md).
-
-## Presenting the project
-
-Use the [two-minute demo script](docs/demo-script.md) and [interview guide](docs/interview-guide.md). Study and adapt the implementation before claiming independent mastery. Development was assisted by OpenAI Codex; the repository includes explicit assumptions, tests and limitations for review.
 
 Licensed under MIT. External dependencies retain their own licenses. No code from the reference projects was copied.
