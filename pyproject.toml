@@ -8,7 +8,7 @@ version = "1.0.0"
 description = "Explainable water-consumption and billing investigations, using synthetic data"
 requires-python = ">=3.11"
 dependencies = [
-  "fastapi>=0.115,<1", "uvicorn>=0.34,<1", "sqlalchemy>=2.0,<2.1",
+  "fastapi>=0.115,<1", "uvicorn>=0.34,<1", "sqlalchemy>=2.0,<2.2",
   "psycopg[binary]>=3.2,<4", "python-multipart>=0.0.20,<1"
 ]
 
